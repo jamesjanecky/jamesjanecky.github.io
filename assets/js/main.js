@@ -1,118 +1,123 @@
 /*
-	Twenty by HTML5 UP
+	Stellar by HTML5 UP
 	html5up.net | @ajlkn
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 */
 
 (function($) {
 
-	skel.breakpoints({
-		wide: '(max-width: 1680px)',
-		normal: '(max-width: 1280px)',
-		narrow: '(max-width: 980px)',
-		narrower: '(max-width: 840px)',
-		mobile: '(max-width: 736px)'
-	});
+	var	$window = $(window),
+		$body = $('body'),
+		$main = $('#main');
 
-	$(function() {
+	// Breakpoints.
+		breakpoints({
+			xlarge:   [ '1281px',  '1680px' ],
+			large:    [ '981px',   '1280px' ],
+			medium:   [ '737px',   '980px'  ],
+			small:    [ '481px',   '736px'  ],
+			xsmall:   [ '361px',   '480px'  ],
+			xxsmall:  [ null,      '360px'  ]
+		});
 
-		var	$window = $(window),
-			$body = $('body'),
-			$header = $('#header'),
-			$banner = $('#banner');
+	// Play initial animations on page load.
+		$window.on('load', function() {
+			window.setTimeout(function() {
+				$body.removeClass('is-preload');
+			}, 100);
+		});
 
-		// Disable animations/transitions until the page has loaded.
-			$body.addClass('is-loading');
+	// Nav.
+		var $nav = $('#nav');
 
-			$window.on('load', function() {
-				$body.removeClass('is-loading');
-			});
+		if ($nav.length > 0) {
 
-		// CSS polyfills (IE<9).
-			if (skel.vars.IEVersion < 9)
-				$(':last-child').addClass('last-child');
-
-		// Fix: Placeholder polyfill.
-			$('form').placeholder();
-
-		// Prioritize "important" elements on narrower.
-			skel.on('+narrower -narrower', function() {
-				$.prioritize(
-					'.important\\28 narrower\\29',
-					skel.breakpoint('narrower').active
-				);
-			});
-
-		// Scrolly links.
-			$('.scrolly').scrolly({
-				speed: 1000,
-				offset: -10
-			});
-
-		// Dropdowns.
-			$('#nav > ul').dropotron({
-				mode: 'fade',
-				noOpenerFade: true,
-				expandMode: (skel.vars.touch ? 'click' : 'hover')
-			});
-
-		// Off-Canvas Navigation.
-
-			// Navigation Button.
-				$(
-					'<div id="navButton">' +
-						'<a href="#navPanel" class="toggle"></a>' +
-					'</div>'
-				)
-					.appendTo($body);
-
-			// Navigation Panel.
-				$(
-					'<div id="navPanel">' +
-						'<nav>' +
-							$('#nav').navList() +
-						'</nav>' +
-					'</div>'
-				)
-					.appendTo($body)
-					.panel({
-						delay: 500,
-						hideOnClick: true,
-						hideOnSwipe: true,
-						resetScroll: true,
-						resetForms: true,
-						side: 'left',
-						target: $body,
-						visibleClass: 'navPanel-visible'
+			// Shrink effect.
+				$main
+					.scrollex({
+						mode: 'top',
+						enter: function() {
+							$nav.addClass('alt');
+						},
+						leave: function() {
+							$nav.removeClass('alt');
+						},
 					});
 
-			// Fix: Remove navPanel transitions on WP<10 (poor/buggy performance).
-				if (skel.vars.os == 'wp' && skel.vars.osVersion < 10)
-					$('#navButton, #navPanel, #page-wrapper')
-						.css('transition', 'none');
+			// Links.
+				var $nav_a = $nav.find('a');
 
-		// Header.
-		// If the header is using "alt" styling and #banner is present, use scrollwatch
-		// to revert it back to normal styling once the user scrolls past the banner.
-		// Note: This is disabled on mobile devices.
-			if (!skel.vars.mobile
-			&&	$header.hasClass('alt')
-			&&	$banner.length > 0) {
+				$nav_a
+					.scrolly({
+						speed: 1000,
+						offset: function() { return $nav.height(); }
+					})
+					.on('click', function() {
 
-				$window.on('load', function() {
+						var $this = $(this);
 
-					$banner.scrollwatch({
-						delay:		0,
-						range:		1,
-						anchor:		'top',
-						on:			function() { $header.addClass('alt reveal'); },
-						off:		function() { $header.removeClass('alt'); }
+						// External link? Bail.
+							if ($this.attr('href').charAt(0) != '#')
+								return;
+
+						// Deactivate all links.
+							$nav_a
+								.removeClass('active')
+								.removeClass('active-locked');
+
+						// Activate link *and* lock it (so Scrollex doesn't try to activate other links as we're scrolling to this one's section).
+							$this
+								.addClass('active')
+								.addClass('active-locked');
+
+					})
+					.each(function() {
+
+						var	$this = $(this),
+							id = $this.attr('href'),
+							$section = $(id);
+
+						// No section for this link? Bail.
+							if ($section.length < 1)
+								return;
+
+						// Scrollex.
+							$section.scrollex({
+								mode: 'middle',
+								initialize: function() {
+
+									// Deactivate section.
+										if (browser.canUse('transition'))
+											$section.addClass('inactive');
+
+								},
+								enter: function() {
+
+									// Activate section.
+										$section.removeClass('inactive');
+
+									// No locked links? Deactivate all links and activate this section's one.
+										if ($nav_a.filter('.active-locked').length == 0) {
+
+											$nav_a.removeClass('active');
+											$this.addClass('active');
+
+										}
+
+									// Otherwise, if this section's link is the one that's locked, unlock it.
+										else if ($this.hasClass('active-locked'))
+											$this.removeClass('active-locked');
+
+								}
+							});
+
 					});
 
-				});
+		}
 
-			}
-
-	});
+	// Scrolly.
+		$('.scrolly').scrolly({
+			speed: 1000
+		});
 
 })(jQuery);
