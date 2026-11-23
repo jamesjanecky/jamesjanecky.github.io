@@ -1,0 +1,1070 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Development log for Lanternfall, a solo round-based survival shooter built slice by slice in Unity 6.">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Lanternfall Devlog</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a harbour logbook. Masthead with a flat-shaded lighthouse, then the chart of milestones,
+   the game, the build pipeline, and dated log entries (newest first) down one 760px column. */
+:root {
+  --bg: #e9eeec;          /* sea-fog paper */
+  --surface: #f6f8f7;
+  --ink: #17242e;         /* harbour ink */
+  --muted: #55646d;
+  --rule: #c9d3d1;
+  --lamp: #b9740f;        /* lighthouse lamp (text-safe on light) */
+  --lamp-fill: #e9a537;
+  --star: #1f8f98;        /* fallen star-glass */
+  --star-soft: #cfe8e8;
+  --done: #2f7d4f;
+  --sea1: #2d4a5c; --sea2: #20384a; --sky: #3a5468; --land: #6f5a48; --tower: #e8e2d6; --tower-shade: #c8bfb0; --band: #b8443a;
+  --s-code: #d8952a; --s-test: #1f8f98; --s-docs: #7466b4;   /* chart series */
+  --font-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d171e; --surface: #13212a; --ink: #dbe4e6; --muted: #92a3ab; --rule: #26383f;
+  --lamp: #f2b544; --lamp-fill: #f2b544; --star: #6fd6da; --star-soft: #173a40; --done: #6cc792;
+  --sea1: #1b3242; --sea2: #122634; --sky: #1a2c38; --land: #4c3e33; --tower: #d6cfc2; --tower-shade: #a39a8c; --band: #a83c33;
+  --s-code: #f2b544; --s-test: #4fc3c9; --s-docs: #a497e4;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0d171e; --surface: #13212a; --ink: #dbe4e6; --muted: #92a3ab; --rule: #26383f;
+  --lamp: #f2b544; --lamp-fill: #f2b544; --star: #6fd6da; --star-soft: #173a40; --done: #6cc792;
+  --sea1: #1b3242; --sea2: #122634; --sky: #1a2c38; --land: #4c3e33; --tower: #d6cfc2; --tower-shade: #a39a8c; --band: #a83c33;
+  --s-code: #f2b544; --s-test: #4fc3c9; --s-docs: #a497e4;
+  color-scheme: dark; }
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.6; }
+.wrap { max-width: 800px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 0 72px; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.05; text-wrap: balance; margin: 0; letter-spacing: .01em; }
+h2 { font-size: 2.3rem; font-weight: 800; text-transform: uppercase; }
+h3 { font-size: 1.55rem; font-weight: 800; }
+p { margin: 0; }
+a { color: var(--star); }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; }
+.mono { font-family: var(--font-mono); font-size: .82em; }
+.eyebrow { font-family: var(--font-mono); font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+section { display: grid; gap: 22px; padding-top: 64px; }
+.sec-head { display: grid; gap: 6px; border-top: 3px solid var(--ink); padding-top: 14px; }
+.lede { color: var(--muted); max-width: 62ch; }
+.prose { display: grid; gap: 14px; max-width: 65ch; }
+
+/* masthead */
+.mast { display: grid; gap: 22px; padding-top: 36px; }
+.scene { width: 100%; height: auto; display: block; border-radius: 4px; }
+.mast-text { display: grid; gap: 12px; }
+.mast h1 { font-size: clamp(3.4rem, 13vw, 6.4rem); font-weight: 800; text-transform: uppercase; letter-spacing: .02em; }
+.mast h1 span { color: var(--lamp); }
+.mast .tag { font-size: 1.2rem; max-width: 56ch; }
+.facts { display: flex; flex-wrap: wrap; gap: 8px 18px; font-family: var(--font-mono); font-size: .8rem; color: var(--muted); }
+.facts b { color: var(--ink); font-weight: 500; }
+
+/* milestone chart */
+.chart { display: grid; gap: 0; }
+.ms { display: grid; grid-template-columns: 64px 1fr auto; gap: 4px 16px; align-items: start; padding: 16px 0; border-bottom: 1px solid var(--rule); }
+.ms-num { font-family: var(--font-display); font-weight: 800; font-size: 2.4rem; line-height: 1; color: var(--muted); }
+.ms.done .ms-num { color: var(--done); }
+.ms.now .ms-num { color: var(--lamp); }
+.ms-body { display: grid; gap: 4px; min-width: 0; }
+.ms-body h3 { font-size: 1.4rem; }
+.ms-body p { color: var(--muted); font-size: .95rem; }
+.pill { font-family: var(--font-mono); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--rule); color: var(--muted); white-space: nowrap; }
+.pill.done { border-color: var(--done); color: var(--done); }
+.pill.now { background: var(--lamp-fill); border-color: var(--lamp-fill); color: #1d1406; }
+.slices { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 6px; }
+.slices li { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: center; font-size: .95rem; }
+.dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid var(--muted); }
+.slices .done .dot { background: var(--done); border-color: var(--done); }
+.slices .next .dot { border-color: var(--lamp); border-style: dashed; }
+.slices .hash { color: var(--muted); }
+.tidebar { height: 10px; border-radius: 5px; background: var(--rule); overflow: hidden; margin-top: 10px; }
+.tidebar i { display: block; height: 100%; width: 20%; background: var(--lamp-fill); }
+
+/* the game */
+.pillars { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; counter-reset: p; }
+.pillars li { display: grid; grid-template-columns: 40px 1fr; gap: 12px; counter-increment: p; }
+.pillars li::before { content: counter(p); font-family: var(--font-display); font-weight: 800; font-size: 1.9rem; line-height: 1.1; color: var(--star); }
+.pillars b { display: block; }
+.pillars span { color: var(--muted); font-size: .96rem; }
+.town { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.place { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 12px 14px; display: grid; gap: 2px; }
+.place b { font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; }
+.place span { color: var(--muted); font-size: .9rem; }
+.place.built { border-color: var(--star); }
+.place.built b::after { content: " · in greybox"; font-family: var(--font-mono); font-size: .68rem; font-weight: 400; color: var(--star); letter-spacing: .05em; }
+
+/* pipeline */
+.pipe { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.stage { background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; padding: 12px; display: grid; gap: 4px; align-content: start; position: relative; min-width: 0; }
+.stage .who { font-family: var(--font-mono); font-size: .75rem; color: var(--star); overflow-wrap: anywhere; }
+.stage b { font-family: var(--font-display); font-size: 1.15rem; font-weight: 800; }
+.stage span { font-size: .85rem; color: var(--muted); }
+.loopnote { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: .92rem; color: var(--muted); }
+.loopnote b { color: var(--ink); }
+
+/* log */
+.log { display: grid; gap: 0; }
+.entry { display: grid; grid-template-columns: 112px 1fr; gap: 20px; padding: 30px 0; border-bottom: 1px solid var(--rule); }
+.when { display: grid; gap: 4px; align-content: start; font-family: var(--font-mono); font-size: .78rem; color: var(--muted); }
+.when .t { font-size: 1.05rem; color: var(--ink); font-weight: 500; }
+.when .hash { color: var(--star); }
+.e-body { display: grid; gap: 14px; min-width: 0; }
+.e-body .kicker { font-family: var(--font-mono); font-size: .74rem; letter-spacing: .1em; text-transform: uppercase; color: var(--lamp); }
+.e-body h3 { font-size: 1.9rem; }
+.e-body ul { margin: 0; padding-left: 1.1em; display: grid; gap: 4px; }
+.numbers { overflow-x: auto; }
+.numbers table { border-collapse: collapse; width: 100%; font-size: .9rem; font-variant-numeric: tabular-nums; }
+.numbers th, .numbers td { text-align: left; padding: 6px 10px 6px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.numbers th { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+.numbers td.n { font-family: var(--font-mono); white-space: nowrap; }
+.sw { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+.how { background: var(--star-soft); border-radius: 6px; padding: 14px 16px; display: grid; gap: 6px; font-size: .94rem; }
+.how .eyebrow { color: var(--star); }
+.stats { display: flex; flex-wrap: wrap; gap: 10px 26px; }
+.stat { display: grid; }
+.stat b { font-family: var(--font-display); font-size: 2rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.stat span { font-size: .78rem; color: var(--muted); font-family: var(--font-mono); }
+.shots { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.shots figure { margin: 0; display: grid; gap: 4px; }
+.shots figure.wide { grid-column: 1 / -1; }
+.shots img { width: 100%; height: auto; border-radius: 4px; display: block; border: 1px solid var(--rule); }
+.shots figcaption { font-size: .82rem; color: var(--muted); }
+details { font-size: .94rem; }
+summary { cursor: pointer; color: var(--star); font-weight: 700; }
+details[open] summary { margin-bottom: 8px; }
+/* git stats */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 18px 24px; }
+.kpi { display: grid; gap: 2px; border-top: 1px solid var(--rule); padding-top: 10px; }
+.kpi b { font-family: var(--font-display); font-size: 2.6rem; font-weight: 800; line-height: 1; font-variant-numeric: tabular-nums; }
+.kpi span { font-size: .85rem; color: var(--muted); }
+.figure { display: grid; gap: 12px; }
+.figure h3 { font-size: 1.35rem; }
+.figure .note { font-size: .85rem; color: var(--muted); max-width: 65ch; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: .85rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.c-code { background: var(--s-code); } .c-test { background: var(--s-test); } .c-docs { background: var(--s-docs); }
+.rows { display: grid; gap: 7px; }
+.row { display: grid; grid-template-columns: 150px 1fr 56px; gap: 12px; align-items: center; font-size: .86rem; }
+.row .lab { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row .lab .mono { color: var(--star); margin-right: 6px; }
+.row .val { font-family: var(--font-mono); font-size: .8rem; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+.track { display: flex; gap: 2px; height: 16px; align-items: stretch; background: linear-gradient(to right, var(--rule) 1px, transparent 1px) 0 0 / 25% 100%; }
+.track i { display: block; height: 100%; border-radius: 0; }
+.track i:last-child { border-radius: 0 4px 4px 0; }
+.track i:hover { filter: brightness(1.12); }
+.axis { display: grid; grid-template-columns: 150px 1fr 56px; gap: 12px; font-family: var(--font-mono); font-size: .7rem; color: var(--muted); }
+.axis div { display: flex; justify-content: space-between; }
+.two { display: grid; grid-template-columns: 1.4fr 1fr; gap: 32px; }
+.two > * { min-width: 0; }
+@media (max-width: 680px) { .two { grid-template-columns: 1fr; } .row, .axis { grid-template-columns: 96px 1fr 48px; gap: 8px; } }
+.log-divider { display: flex; align-items: center; gap: 12px; padding: 26px 0 0; font-family: var(--font-mono); font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--lamp); }
+.log-divider::after { content: ""; flex: 1; height: 1px; background: var(--lamp); opacity: .5; }
+.foot { padding-top: 48px; font-size: .85rem; color: var(--muted); display: grid; gap: 6px; }
+
+@media (max-width: 680px) {
+  .pipe { grid-template-columns: 1fr 1fr; }
+  .entry { grid-template-columns: 1fr; gap: 10px; }
+  .when { grid-auto-flow: column; justify-content: start; gap: 14px; align-items: baseline; }
+  .shots { grid-template-columns: 1fr; }
+  .ms { grid-template-columns: 44px 1fr; }
+  .ms .pill { grid-column: 2; justify-self: start; }
+  .ms-num { font-size: 1.9rem; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .beam { transform-origin: 300px 70px; animation: sweep 7s ease-in-out infinite alternate; }
+  @keyframes sweep { from { transform: rotate(-9deg); } to { transform: rotate(9deg); } }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="mast">
+  <!-- flat-shaded harbour: lighthouse on the point, star crater glowing in the bay -->
+  <svg class="scene" viewBox="0 0 800 260" role="img" aria-label="A low-poly lighthouse on a rocky point at night, its beam sweeping over a bay where a fallen star glows under the water">
+    <rect width="800" height="260" fill="var(--sky)"/>
+    <polygon points="0,150 120,128 260,140 400,122 560,136 700,118 800,130 800,260 0,260" fill="var(--sea1)"/>
+    <polygon points="0,190 180,176 380,188 600,172 800,184 800,260 0,260" fill="var(--sea2)"/>
+    <g class="beam"><polygon points="300,70 800,20 800,96" fill="var(--lamp-fill)" opacity=".18"/></g>
+    <polygon points="180,160 236,120 340,112 410,150 380,176 210,180" fill="var(--land)"/>
+    <polygon points="236,120 290,118 300,150 210,180" fill="var(--land)" opacity=".75"/>
+    <polygon points="285,118 315,118 310,70 290,70" fill="var(--tower)"/>
+    <polygon points="300,118 315,118 310,70 300,70" fill="var(--tower-shade)"/>
+    <polygon points="288,100 312,100 311,90 289,90" fill="var(--band)"/>
+    <rect x="288" y="58" width="24" height="12" fill="var(--lamp-fill)"/>
+    <polygon points="284,58 316,58 300,46" fill="var(--band)"/>
+    <polygon points="600,200 616,186 632,200 616,214" fill="var(--star)"/>
+    <polygon points="616,186 622,200 616,214 610,200" fill="var(--tower)" opacity=".7"/>
+    <ellipse cx="616" cy="200" rx="62" ry="10" fill="var(--star)" opacity=".18"/>
+    <polygon points="40,40 44,48 40,56 36,48" fill="var(--tower)" opacity=".6"/>
+    <polygon points="520,30 523,36 520,42 517,36" fill="var(--tower)" opacity=".5"/>
+    <polygon points="710,56 713,62 710,68 707,62" fill="var(--tower)" opacity=".5"/>
+  </svg>
+  <div class="mast-text">
+    <p class="eyebrow">Devlog · working title</p>
+    <h1>Lantern<span>fall</span></h1>
+    <p class="tag">A star fell into the bay of a storm-battered fishing town, and the townsfolk came back from the water wrong. A solo, round-based survival shooter, built one playable slice at a time by a team of AI agents in Unity 6.</p>
+    <div class="facts">
+      <span>Engine <b>Unity 6 · URP</b></span>
+      <span>Now <b>Polish before Milestone 4</b></span>
+      <span>Tests <b>437 passing</b></span>
+      <span>Last entry <b>23 Nov 2026</b></span>
+    </div>
+  </div>
+</header>
+
+<!-- ======================= MILESTONES ======================= -->
+<section id="milestones">
+  <div class="sec-head">
+    <p class="eyebrow">Chart of the voyage</p>
+    <h2>Milestones</h2>
+  </div>
+  <div class="chart">
+    <div class="ms done">
+      <div class="ms-num">M1</div>
+      <div class="ms-body"><h3>Core loop</h3><p>Pistol start, the Drowned, rounds, points, wall buys, doors, barricades, health and death, score screen. Greybox map with three areas.</p></div>
+      <span class="pill done">Done</span>
+    </div>
+    <div class="ms done">
+      <div class="ms-num">M2</div>
+      <div class="ms-body">
+        <h3>Spending &amp; build-up</h3>
+        <p>Things to spend points on, and a second layer of in-run levelling from star shards.</p>
+        <div class="tidebar" aria-label="5 of 5 slices done"><i style="width:100%"></i></div>
+        <ol class="slices">
+          <li class="done"><span class="dot"></span><span>1 · Power-up drops</span><span class="mono hash">fe96e1b</span></li>
+          <li class="done"><span class="dot"></span><span>2 · Perks</span><span class="mono hash">a186c91</span></li>
+          <li class="done"><span class="dot"></span><span>3 · Castaway Chest</span><span class="mono hash">c8190f2</span></li>
+          <li class="done"><span class="dot"></span><span>4 · Star Anvil</span><span class="mono hash">d87d77c</span></li>
+          <li class="done"><span class="dot"></span><span>5 · Star shards + level-ups</span><span class="mono hash">8e5b38d</span></li>
+        </ol>
+      </div>
+      <span class="pill done">Done</span>
+    </div>
+    <div class="ms done">
+      <div class="ms-num">M3</div>
+      <div class="ms-body">
+        <h3>The town</h3>
+        <p>The full town, the lighthouse that powers it, a special enemy round and the first side quest.</p>
+        <div class="tidebar" aria-label="4 of 4 slices done"><i style="width:100%"></i></div>
+        <ol class="slices">
+          <li class="done"><span class="dot"></span><span>1 · Town blockout</span><span class="mono hash">bafa4a5</span></li>
+          <li class="done"><span class="dot"></span><span>2 · Lighthouse power</span><span class="mono hash">8908eb1</span></li>
+          <li class="done"><span class="dot"></span><span>3 · Brine Hound rounds</span><span class="mono hash">1a03a74</span></li>
+          <li class="done"><span class="dot"></span><span>4 · Driftwood Shield</span><span class="mono hash">82c6a75</span></li>
+        </ol>
+      </div>
+      <span class="pill done">Done</span>
+    </div>
+    <div class="ms now">
+      <div class="ms-num">M4</div>
+      <div class="ms-body"><h3>The Starbow</h3><p>The unlock quest for the signature bow and its four upgrade paths. First, a polish pass: a new sky, tighter shooting and four kinds of Drowned.</p></div>
+      <span class="pill now">Up next</span>
+    </div>
+    <div class="ms">
+      <div class="ms-num">M5</div>
+      <div class="ms-body"><h3>Endgame</h3><p>The Bellringer, the main quest, the Keeper boss, then a polish and art pass.</p></div>
+      <span class="pill">Planned</span>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= THE GAME ======================= -->
+<section id="game">
+  <div class="sec-head">
+    <p class="eyebrow">What we're making</p>
+    <h2>The game</h2>
+  </div>
+  <div class="prose">
+    <p>Lanternfall is an island fishing town built around an old lighthouse. One night a star fell into the bay. The people who were out on the water came back changed, and now <b>the Drowned</b> climb out of the sea in waves, tearing the boards off the windows to get in.</p>
+    <p>You start with a pistol and 500 points. Every hit and kill pays. Spend it to open doors deeper into town, buy guns chalked on the walls, drink perks, gamble at the <b>Castaway Chest</b> and upgrade your gun at the <b>Star Anvil</b>, which sits in the crater where the star landed. Kills also drop star shards, and every level-up lets you pick one of three upgrades, so each run grows its own odd build.</p>
+    <p>Go further and the side quests open up: relight the lighthouse to bring back power, build the <b>Driftwood Shield</b>, forge the <b>Starbow</b> from washed-up star-glass and pick one of its four upgrade paths. At the end of the main quest the <b>Keeper</b> waits in the lamp room: the old lighthouse keeper, fused with the fallen star.</p>
+  </div>
+
+  <h3>Five pillars</h3>
+  <ol class="pillars">
+    <li><div><b>Tight round-based tension</b><span>Short, escalating fights with a breather between rounds to spend, build and plan. Dying should always feel like "one more run".</span></div></li>
+    <li><div><b>Always progressing</b><span>Something unlocks every few minutes: a door, a gun, a perk, a level-up, a quest step. Weak start, absurd late game.</span></div></li>
+    <li><div><b>Two layers of build-up</b><span>Points buy things in the world. Star shards level you up during the run. Builds reset every run.</span></div></li>
+    <li><div><b>Secrets reward curiosity</b><span>Quests are optional but make you much stronger.</span></div></li>
+    <li><div><b>Readable, chunky, fast</b><span>Flat-shaded low-poly with bold colour and loud feedback. 60 fps on an integrated GPU is a hard requirement.</span></div></li>
+  </ol>
+
+  <h3>The town</h3>
+  <div class="town">
+    <div class="place built"><b>The Harbour</b><span>Spawn and hub. Docks, fish market, first wall guns.</span></div>
+    <div class="place built"><b>Chapel Row</b><span>Narrow streets around a hollow chapel you can walk through.</span></div>
+    <div class="place built"><b>The Cannery</b><span>Big interior with machinery and perk machines.</span></div>
+    <div class="place built"><b>Salt Flats</b><span>Pale open ground between the Cannery and Chapel Row.</span></div>
+    <div class="place built"><b>Sea Wall &amp; Tide Pools</b><span>Open ground, exposed at low tide.</span></div>
+    <div class="place built"><b>The Lighthouse</b><span>The power switch. Its lamp room will be the boss arena.</span></div>
+    <div class="place built"><b>Sunken Tunnels</b><span>Passages 4 m below the town, reached by three stairs.</span></div>
+    <div class="place built"><b>Crater Shallows</b><span>Where the star fell, behind a 2000-point gate. Home of the Star Anvil.</span></div>
+  </div>
+</section>
+
+<!-- ======================= HOW IT'S BUILT ======================= -->
+<section id="pipeline">
+  <div class="sec-head">
+    <p class="eyebrow">The shipyard</p>
+    <h2>How it's built</h2>
+  </div>
+  <p class="lede">Each feature goes through one command, <span class="mono">/build-feature</span>. An orchestrating Claude session hands the work to specialist agents in order, judges their reports, and loops until everything is green. Since slice 3 it runs lean: the programmer writes its own tests, and the playtest and review are short and run on a cheaper model. For map work, a level-designer agent joins after the game-designer.</p>
+  <div class="pipe">
+    <div class="stage"><span class="who">game-designer</span><b>Design</b><span>Rules, numbers and a programmer spec in Docs/Design.</span></div>
+    <div class="stage"><span class="who">gameplay-programmer</span><b>Build + test</b><span>C#, data assets and focused EditMode tests. Zero compile errors.</span></div>
+    <div class="stage"><span class="who">playtester</span><b>Play</b><span>3–4 checks in the running game, 1–2 screenshots. On Sonnet.</span></div>
+    <div class="stage"><span class="who">code-reviewer</span><b>Review</b><span>Real issues only: bugs, performance, conventions. On Sonnet.</span></div>
+    <div class="stage"><span class="who">test-writer</span><b>Extra tests</b><span>Only on request, for tricky logic. Ran every step in slices 1–2.</span></div>
+  </div>
+  <div class="loopnote">
+    <span><b>Fix loop:</b> every failure goes back to the programmer together, up to 3 rounds.</span>
+    <span><b>Safety net:</b> a hook recompiles in Unity and runs all the tests before any session can finish.</span>
+  </div>
+</section>
+
+<!-- ======================= GIT STATS (as of fe96e1b) ======================= -->
+<section id="stats">
+  <div class="sec-head">
+    <p class="eyebrow">From the git history · as of b48faed</p>
+    <h2>By the numbers</h2>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><b>30</b><span>commits over 3 days</span></div>
+    <div class="kpi"><b>23,959</b><span>lines of game C# in 152 files</span></div>
+    <div class="kpi"><b>437</b><span>tests in 5,326 lines of test code</span></div>
+    <div class="kpi"><b>29,005</b><span>words of design docs in 12 files</span></div>
+    <div class="kpi"><b>53</b><span>sound effects, synthesized from code</span></div>
+    <div class="kpi"><b>3 of 5</b><span>milestones done</span></div>
+  </div>
+
+  <div class="figure">
+    <h3>Lines written per commit</h3>
+    <div class="legend">
+      <span><i class="c-code"></i>Game code</span>
+      <span><i class="c-test"></i>Tests</span>
+      <span><i class="c-docs"></i>Design docs &amp; agent setup</span>
+    </div>
+    <div class="rows" role="img" aria-label="Lines added per commit. Star shards added the most, 3,196 lines; Brine Hounds added 2,642.">
+      <div class="row"><span class="lab"><span class="mono">82aa07e</span>Project setup</span><div class="track"><i class="c-docs" style="width:7.1%" title="Docs &amp; agents: 226"></i></div><span class="val">226</span></div>
+      <div class="row"><span class="lab"><span class="mono">d482700</span>Controller &amp; rifle</span><div class="track"><i class="c-code" style="width:36.2%" title="Game code: 1,158"></i><i class="c-test" style="width:7.3%" title="Tests: 234"></i><i class="c-docs" style="width:0.3%" title="Docs &amp; agents: 9"></i></div><span class="val">1,401</span></div>
+      <div class="row"><span class="lab"><span class="mono">5a4b626</span>Two more agents</span><div class="track"><i class="c-docs" style="width:1.6%" title="Docs &amp; agents: 52"></i></div><span class="val">52</span></div>
+      <div class="row"><span class="lab"><span class="mono">745ad4f</span>Vision</span><div class="track"><i class="c-docs" style="width:5.2%" title="Docs &amp; agents: 167"></i></div><span class="val">167</span></div>
+      <div class="row"><span class="lab"><span class="mono">9f6ce2e</span>Milestone 1</span><div class="track"><i class="c-code" style="width:78.6%" title="Game code: 2,514"></i><i class="c-test" style="width:5.2%" title="Tests: 165"></i><i class="c-docs" style="width:0.4%" title="Docs &amp; agents: 13"></i></div><span class="val">2,692</span></div>
+      <div class="row"><span class="lab"><span class="mono">a804803</span>Agent pipeline</span><div class="track"><i class="c-docs" style="width:5.6%" title="Docs &amp; agents: 180"></i></div><span class="val">180</span></div>
+      <div class="row"><span class="lab"><span class="mono">fe96e1b</span>Power-up drops</span><div class="track"><i class="c-code" style="width:30.7%" title="Game code: 982"></i><i class="c-test" style="width:15.3%" title="Tests: 491"></i><i class="c-docs" style="width:4.4%" title="Docs &amp; agents: 140"></i></div><span class="val">1,613</span></div>
+      <div class="row"><span class="lab"><span class="mono">a186c91</span>Perk machines</span><div class="track"><i class="c-code" style="width:33.1%" title="Game code: 1,058"></i><i class="c-test" style="width:23.2%" title="Tests: 744"></i><i class="c-docs" style="width:4.9%" title="Docs &amp; agents: 156"></i></div><span class="val">1,958</span></div>
+      <div class="row"><span class="lab"><span class="mono">1236274</span>Lean pipeline</span><div class="track"><i class="c-docs" style="width:0.5%" title="Docs &amp; agents: 17"></i></div><span class="val">17</span></div>
+      <div class="row"><span class="lab"><span class="mono">c8190f2</span>Castaway Chest</span><div class="track"><i class="c-code" style="width:42.4%" title="Game code: 1,358"></i><i class="c-test" style="width:9.2%" title="Tests: 294"></i><i class="c-docs" style="width:7.2%" title="Docs &amp; agents: 229"></i></div><span class="val">1,881</span></div>
+      <div class="row"><span class="lab"><span class="mono">d87d77c</span>Star Anvil</span><div class="track"><i class="c-code" style="width:63.7%" title="Game code: 2,037"></i><i class="c-test" style="width:12.2%" title="Tests: 389"></i><i class="c-docs" style="width:7.5%" title="Docs &amp; agents: 239"></i></div><span class="val">2,665</span></div>
+      <div class="row"><span class="lab"><span class="mono">4945bbf</span>60 fps cap</span><div class="track"><i class="c-code" style="width:0.7%" title="Game code: 21"></i></div><span class="val">21</span></div>
+      <div class="row"><span class="lab"><span class="mono">8e5b38d</span>Star shards</span><div class="track"><i class="c-code" style="width:79.3%" title="Game code: 2,538"></i><i class="c-test" style="width:14.3%" title="Tests: 457"></i><i class="c-docs" style="width:6.3%" title="Docs &amp; agents: 201"></i></div><span class="val">3,196</span></div>
+      <div class="row"><span class="lab"><span class="mono">9ff1112</span>Game feel pass</span><div class="track"><i class="c-code" style="width:79.9%" title="Game code: 2,556"></i><i class="c-test" style="width:8.4%" title="Tests: 270"></i><i class="c-docs" style="width:2.1%" title="Docs &amp; agents: 68"></i></div><span class="val">2,894</span></div>
+      <div class="row"><span class="lab"><span class="mono">6da1478</span>Level-designer agent</span><div class="track"><i class="c-docs" style="width:1.5%" title="Docs &amp; agents: 48"></i></div><span class="val">48</span></div>
+      <div class="row"><span class="lab"><span class="mono">665c330</span>Map design</span><div class="track"><i class="c-docs" style="width:14.3%" title="Docs &amp; agents: 458"></i></div><span class="val">458</span></div>
+      <div class="row"><span class="lab"><span class="mono">45836af</span>Town (checkpoint)</span><div class="track"><i class="c-code" style="width:26.2%" title="Game code: 837"></i><i class="c-test" style="width:5.8%" title="Tests: 185"></i><i class="c-docs" style="width:0.2%" title="Docs &amp; agents: 6"></i></div><span class="val">1,028</span></div>
+      <div class="row"><span class="lab"><span class="mono">bafa4a5</span>Town blockout</span><div class="track"><i class="c-code" style="width:0.5%" title="Game code: 16"></i><i class="c-docs" style="width:0.3%" title="Docs &amp; agents: 9"></i></div><span class="val">25</span></div>
+      <div class="row"><span class="lab"><span class="mono">6029f31</span>Lighthouse design</span><div class="track"><i class="c-docs" style="width:3.1%" title="Docs &amp; agents: 98"></i></div><span class="val">98</span></div>
+      <div class="row"><span class="lab"><span class="mono">8908eb1</span>Lighthouse power</span><div class="track"><i class="c-code" style="width:35.2%" title="Game code: 1,128"></i><i class="c-test" style="width:7.5%" title="Tests: 239"></i><i class="c-docs" style="width:0.2%" title="Docs &amp; agents: 5"></i></div><span class="val">1,372</span></div>
+      <div class="row"><span class="lab"><span class="mono">1a3d766</span>Playtest tuning</span><div class="track"><i class="c-code" style="width:0.3%" title="Game code: 11"></i><i class="c-test" style="width:0.4%" title="Tests: 12"></i></div><span class="val">23</span></div>
+      <div class="row"><span class="lab"><span class="mono">75b3b7d</span>Knife stab</span><div class="track"><i class="c-code" style="width:14.5%" title="Game code: 463"></i><i class="c-test" style="width:5%" title="Tests: 159"></i><i class="c-docs" style="width:0.4%" title="Docs &amp; agents: 12"></i></div><span class="val">634</span></div>
+      <div class="row"><span class="lab"><span class="mono">386de1d</span>Hound design</span><div class="track"><i class="c-docs" style="width:4.3%" title="Docs &amp; agents: 138"></i></div><span class="val">138</span></div>
+      <div class="row"><span class="lab"><span class="mono">1a03a74</span>Brine Hounds</span><div class="track"><i class="c-code" style="width:68.7%" title="Game code: 2,199"></i><i class="c-test" style="width:13.6%" title="Tests: 434"></i><i class="c-docs" style="width:0.3%" title="Docs &amp; agents: 9"></i></div><span class="val">2,642</span></div>
+      <div class="row"><span class="lab"><span class="mono">b373d5d</span>Shield design</span><div class="track"><i class="c-docs" style="width:2.6%" title="Docs &amp; agents: 82"></i></div><span class="val">82</span></div>
+      <div class="row"><span class="lab"><span class="mono">82c6a75</span>Driftwood Shield</span><div class="track"><i class="c-code" style="width:66.4%" title="Game code: 2,124"></i><i class="c-test" style="width:9.8%" title="Tests: 312"></i><i class="c-docs" style="width:0.9%" title="Docs &amp; agents: 30"></i></div><span class="val">2,466</span></div>
+      <div class="row"><span class="lab"><span class="mono">e9a1e11</span>Sky &amp; atmosphere</span><div class="track"><i class="c-code" style="width:31.8%" title="Game code: 1,018"></i><i class="c-test" style="width:9%" title="Tests: 289"></i><i class="c-docs" style="width:0.2%" title="Docs &amp; agents: 7"></i></div><span class="val">1,314</span></div>
+      <div class="row"><span class="lab"><span class="mono">7bf783d</span>Variety design</span><div class="track"><i class="c-docs" style="width:3.1%" title="Docs &amp; agents: 100"></i></div><span class="val">100</span></div>
+      <div class="row"><span class="lab"><span class="mono">9fa8ab8</span>Tight-feel fixes</span><div class="track"><i class="c-code" style="width:14.9%" title="Game code: 478"></i><i class="c-test" style="width:8.3%" title="Tests: 267"></i></div><span class="val">745</span></div>
+      <div class="row"><span class="lab"><span class="mono">b48faed</span>Drowned variety</span><div class="track"><i class="c-code" style="width:79.9%" title="Game code: 2,558"></i><i class="c-test" style="width:12.5%" title="Tests: 401"></i><i class="c-docs" style="width:0.1%" title="Docs &amp; agents: 4"></i></div><span class="val">2,963</span></div>
+    </div>
+    <div class="axis"><span></span><div><span>0</span><span>800</span><span>1,600</span><span>2,400</span><span>3,200</span></div><span></span></div>
+    <p class="note">Lines added, oldest commit first. Game code is C# only; the Python sound generator (675 lines) is left out. Unity's own files are left out: scenes, prefabs, materials and sounds add about 474,000 more lines, most of them the generated map scene, which is rewritten each time the map is rebuilt. The town blockout and every slice since rebuilt a much bigger scene.</p>
+  </div>
+
+  <div class="two">
+    <div class="figure">
+      <h3>Game code by system</h3>
+      <div class="rows" role="img" aria-label="Lines of C# by system. The map builder is the largest at 3,103 lines, then the Drowned at 2,544.">
+        <div class="row"><span class="lab">Map builder</span><div class="track"><i class="c-test" style="width:100%" title="Editor: 3,103"></i></div><span class="val">3,103</span></div>
+        <div class="row"><span class="lab">The Drowned</span><div class="track"><i class="c-test" style="width:82%" title="Enemies: 2,544"></i></div><span class="val">2,544</span></div>
+        <div class="row"><span class="lab">Game feel</span><div class="track"><i class="c-test" style="width:79.8%" title="Feel: 2,475"></i></div><span class="val">2,475</span></div>
+        <div class="row"><span class="lab">Star shards</span><div class="track"><i class="c-test" style="width:70.2%" title="Shards: 2,179"></i></div><span class="val">2,179</span></div>
+        <div class="row"><span class="lab">Rounds &amp; hounds</span><div class="track"><i class="c-test" style="width:57.8%" title="Waves: 1,795"></i></div><span class="val">1,795</span></div>
+        <div class="row"><span class="lab">Star Anvil</span><div class="track"><i class="c-test" style="width:53%" title="Anvil: 1,646"></i></div><span class="val">1,646</span></div>
+        <div class="row"><span class="lab">Driftwood Shield</span><div class="track"><i class="c-test" style="width:51.6%" title="Shield: 1,602"></i></div><span class="val">1,602</span></div>
+        <div class="row"><span class="lab">Lighthouse &amp; sky</span><div class="track"><i class="c-test" style="width:49.9%" title="World: 1,549"></i></div><span class="val">1,549</span></div>
+        <div class="row"><span class="lab">Weapons</span><div class="track"><i class="c-test" style="width:41.6%" title="Weapons: 1,290"></i></div><span class="val">1,290</span></div>
+        <div class="row"><span class="lab">HUD</span><div class="track"><i class="c-test" style="width:41.3%" title="UI: 1,280"></i></div><span class="val">1,280</span></div>
+        <div class="row"><span class="lab">Player &amp; knife</span><div class="track"><i class="c-test" style="width:33.5%" title="Player: 1,039"></i></div><span class="val">1,039</span></div>
+        <div class="row"><span class="lab">Castaway Chest</span><div class="track"><i class="c-test" style="width:30.1%" title="Chest: 933"></i></div><span class="val">933</span></div>
+        <div class="row"><span class="lab">Power-ups</span><div class="track"><i class="c-test" style="width:26.2%" title="PowerUps: 814"></i></div><span class="val">814</span></div>
+        <div class="row"><span class="lab">Perks</span><div class="track"><i class="c-test" style="width:21.4%" title="Perks: 664"></i></div><span class="val">664</span></div>
+        <div class="row"><span class="lab">Core</span><div class="track"><i class="c-test" style="width:17.3%" title="Core: 538"></i></div><span class="val">538</span></div>
+        <div class="row"><span class="lab">Doors &amp; buys</span><div class="track"><i class="c-test" style="width:11.5%" title="Interaction: 356"></i></div><span class="val">356</span></div>
+        <div class="row"><span class="lab">Points</span><div class="track"><i class="c-test" style="width:4.9%" title="Economy: 152"></i></div><span class="val">152</span></div>
+      </div>
+    </div>
+    <div class="figure">
+      <h3>Tests passing</h3>
+      <div class="rows" role="img" aria-label="Tests passing grew from 25 to 245 by the end of Milestone 2, 365 at the end of Milestone 3, and 437 after the polish pass.">
+        <div class="row"><span class="lab">Controller</span><div class="track"><i class="c-code" style="width:5.7%" title="25 tests"></i></div><span class="val">25</span></div>
+        <div class="row"><span class="lab">Milestone 1</span><div class="track"><i class="c-code" style="width:10.8%" title="47 tests"></i></div><span class="val">47</span></div>
+        <div class="row"><span class="lab">Power-ups</span><div class="track"><i class="c-code" style="width:22.9%" title="100 tests"></i></div><span class="val">100</span></div>
+        <div class="row"><span class="lab">Perks</span><div class="track"><i class="c-code" style="width:35.5%" title="155 tests"></i></div><span class="val">155</span></div>
+        <div class="row"><span class="lab">Chest</span><div class="track"><i class="c-code" style="width:39.8%" title="174 tests"></i></div><span class="val">174</span></div>
+        <div class="row"><span class="lab">Star Anvil</span><div class="track"><i class="c-code" style="width:44.2%" title="193 tests"></i></div><span class="val">193</span></div>
+        <div class="row"><span class="lab">Star shards</span><div class="track"><i class="c-code" style="width:50.6%" title="221 tests"></i></div><span class="val">221</span></div>
+        <div class="row"><span class="lab">Game feel</span><div class="track"><i class="c-code" style="width:56.1%" title="245 tests"></i></div><span class="val">245</span></div>
+        <div class="row"><span class="lab">M3 · hounds</span><div class="track"><i class="c-code" style="width:77.3%" title="338 tests"></i></div><span class="val">338</span></div>
+        <div class="row"><span class="lab">M3 · shield</span><div class="track"><i class="c-code" style="width:83.5%" title="365 tests"></i></div><span class="val">365</span></div>
+        <div class="row"><span class="lab">Polish</span><div class="track"><i class="c-code" style="width:100%" title="437 tests"></i></div><span class="val">437</span></div>
+      </div>
+      <p class="note">EditMode tests for the plain-C# rules: damage, ammo, points, round scaling, drop odds, perks, chest rolls, upgrades, elements, XP, level-up rolls, shake, springs, flinch, hit-stop, spawning, the lighthouse warm-up, hound schedules, the knife, the shield, the sky, fire timing and the Drowned variants. The Stop hook runs all of them before a session can finish.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= LOG ======================= -->
+<section id="log">
+  <div class="sec-head">
+    <p class="eyebrow">Ship's log · newest first</p>
+    <h2>Log</h2>
+  </div>
+  <div class="log">
+
+    <!-- GROUP: polish between M3 and M4 -->
+    <div class="log-divider">Polish between milestones · after M3, before the Starbow</div>
+
+    <!-- ENTRY: Drowned variety -->
+    <article class="entry" id="drowned-variety">
+      <div class="when"><span class="t">01:33</span><span>23 Nov 2026</span><span class="hash">b48faed</span></div>
+      <div class="e-body">
+        <p class="kicker">Polish · enemies</p>
+        <h3>Four kinds of Drowned</h3>
+        <p>Until now every Drowned was the same body. Now there are four, each with its own silhouette and eye colour, so you can read a crowd at a glance. The user approved all four from the design.</p>
+        <div class="numbers">
+          <table>
+            <thead><tr><th>Variant</th><th>Looks like</th><th>Eyes</th><th>Health</th><th>From</th></tr></thead>
+            <tbody>
+              <tr><td>Dockhand</td><td>The basic one: hunched, one shoulder low, a limping shamble</td><td>green</td><td class="n">1.0×</td><td class="n">round 1</td></tr>
+              <tr><td>Netter</td><td>Tall and thin, long arms trailing a net. Fast, and weaves as it runs</td><td>amber</td><td class="n">0.6×</td><td class="n">round 3</td></tr>
+              <tr><td>Floater</td><td>A wide, bloated tank with a cork-buoy bladder strapped to its belly. Hits for 54</td><td>sickly yellow</td><td class="n">1.8×</td><td class="n">round 4</td></tr>
+              <tr><td>Tidecrawler</td><td>Legless, dragging itself on long arms. Lunges from 3 m</td><td>cold white</td><td class="n">0.7×</td><td class="n">round 5</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li><b>The Floater's bladder</b> takes 3× damage. Shoot it and it pops, staggers the Drowned around it and pays 100.</li>
+          <li><b>The mix grows with the rounds.</b> Each variant is guaranteed to show up in its first round, each has a cap on how many can be alive at once, and at least 40% of every round is still Dockhands.</li>
+          <li><b>They move like bodies now.</b> Procedural shamble, run and sprint cycles, reaching arms, a lurch when they start running, climbing through windows, and falls in the direction they were hit. Each one gets a slightly different size, shade and posture.</li>
+          <li><b>Readable attacks.</b> Eyes flare white-hot just before a swing, and crowds spread into an arc around you instead of queuing in a line.</li>
+          <li><b>Two bugs caught on the way:</b> pooled Drowned could come back unshootable, or still glowing from the burn element.</li>
+        </ul>
+        <div class="shots">
+          <figure class="wide"><img src="shots/pol_var_lineup.jpg" alt="Six Drowned walking toward the player under a faceted cloudy sky: three dark hunched Dockhands, a tall thin Netter in rust-red rags, a wide Floater with an orange bladder on its belly, and a low blue Tidecrawler on its arms" width="1280" height="720" loading="lazy"><figcaption>The lineup. Dockhands on the left, the tall Netter, the Floater with its orange bladder, and a Tidecrawler low on the right.</figcaption></figure>
+        </div>
+        <div class="how">
+          <p class="eyebrow">How it was built</p>
+          <p>Design first (7bf783d), with each variant's health, speed, damage and shots-to-kill worked out per round. Movement comes from a procedural <span class="mono">DrownedAnimator</span> with level-of-detail, so 24 animated Drowned stay inside the 60 fps budget. The Drowned code grew from 881 to 2,544 lines, the biggest jump of any system.</p>
+          <div class="stats">
+            <div class="stat"><b>+22</b><span>new EditMode tests</span></div>
+            <div class="stat"><b>437</b><span>tests passing</span></div>
+            <div class="stat"><b>4</b><span>variants</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: tight-feel fixes -->
+    <article class="entry" id="tight-feel">
+      <div class="when"><span class="t">00:56</span><span>23 Nov 2026</span><span class="hash">9fa8ab8</span></div>
+      <div class="e-body">
+        <p class="kicker">Polish · shooting</p>
+        <h3>Tighter shooting</h3>
+        <p>The user asked for the shooting to feel tight, like a modern shooter. Two fixes came out of it.</p>
+        <ul>
+          <li><b>Guns fire at their real rate.</b> At 60 fps, fast guns were losing a little time on every shot. Each shot now carries the leftover time into the next one. The Rattler SMG, rated at 850 rounds a minute, went from about 720 to about 848. There's no catch-up burst after a pause, and semi-auto guns buffer a click for 0.1 s.</li>
+          <li><b>You can see where hits come from.</b> Red arcs around the crosshair point at whatever hit you, and keep pointing at it as you turn. Hits your shield blocks show a pale wood-coloured arc instead.</li>
+        </ul>
+        <div class="numbers">
+          <table>
+            <thead><tr><th>Rattler SMG at 60 fps</th><th>Rounds per minute</th></tr></thead>
+            <tbody>
+              <tr><td>Rated</td><td class="n">850</td></tr>
+              <tr><td>Before</td><td class="n">~720</td></tr>
+              <tr><td>After</td><td class="n">~848</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="shots">
+          <figure class="wide"><img src="shots/pol_dmg_indicator.jpg" alt="A red damage-tinted view with two arcs around the crosshair: a red arc to the left and a pale wood-coloured arc to the upper right" width="1280" height="720" loading="lazy"><figcaption>Taking hits from two sides. The red arc is a hit that landed, the pale one a hit the shield blocked.</figcaption></figure>
+        </div>
+        <div class="stats">
+          <div class="stat"><b>+30</b><span>new EditMode tests</span></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: sky -->
+    <article class="entry" id="sky">
+      <div class="when"><span class="t">00:28</span><span>23 Nov 2026</span><span class="hash">e9a1e11</span></div>
+      <div class="e-body">
+        <p class="kicker">Polish · atmosphere</p>
+        <h3>A stormy night sky</h3>
+        <p>The user noticed the sky looked basic, so it was rebuilt. The flat colour is gone. In its place is a procedural stormy night that fades from navy to sea-green and blends into the fog at the horizon, with bands of faceted low-poly cloud drifting across it. A low-poly moon now sets the direction of the moonlight. Lightning flashes across the clouds now and then, with distant thunder from the sound generator. Low over the Crater, the fallen star glows and twinkles, a landmark you can see from anywhere in town.</p>
+        <ul>
+          <li>The sky follows the game: it darkens a little each round, turns teal for a Brine Tide and brightens once the lighthouse is lit.</li>
+          <li>A single <span class="mono">SkyDirector</span> owns the sky, fog and ambient light, so the systems don't fight over them. A lightning flash never freezes while the game is paused.</li>
+        </ul>
+        <div class="shots">
+          <figure class="wide"><img src="shots/pol_sky_star.jpg" alt="The fallen star shining white with a pink and teal halo low in a sky of faceted grey clouds, seen from the Harbour" width="1280" height="720" loading="lazy"><figcaption>The fallen star over the Crater, seen from the Harbour.</figcaption></figure>
+          <figure><img src="shots/pol_sky_lit.jpg" alt="The lighthouse tower against the night sky with two broad pale beams sweeping out from the lamp" width="1280" height="720" loading="lazy"><figcaption>The lighthouse lit against the new sky.</figcaption></figure>
+          <figure><img src="shots/pol_sky_tide.jpg" alt="The same Harbour view tinted teal during a Brine Tide, with Hounds left: 10 on the HUD" width="1280" height="720" loading="lazy"><figcaption>The same view during a Brine Tide, gone teal.</figcaption></figure>
+        </div>
+        <div class="stats">
+          <div class="stat"><b>+19</b><span>new EditMode tests</span></div>
+        </div>
+      </div>
+    </article>
+
+    <div class="log-divider">Milestone 3 · the town</div>
+
+    <!-- ENTRY: M3 slice 4 -->
+    <article class="entry" id="m3-slice-4">
+      <div class="when"><span class="t">19:51</span><span>22 Nov 2026</span><span class="hash">82c6a75</span></div>
+      <div class="e-body">
+        <p class="kicker">Milestone 3 · slice 4 of 4 · milestone complete</p>
+        <h3>The Driftwood Shield</h3>
+        <p>The first side quest. Three parts wash up somewhere in town each run: a plank, an iron rim and a net strap. Each one lands at one of two seeded spots. Bring all three to either workbench and hold E for 3 seconds to build the shield, free of charge. Hold Q to raise it and it blocks every hit from a 120° cone in front of you. While it's up you can't shoot or sprint, but V or a click bashes for 60 damage and shoves the Drowned 4 m back, never through a wall. Put it away and it still covers your back, soaking half of every hit from behind.</p>
+        <div class="numbers">
+          <table>
+            <thead><tr><th>600 durability lasts…</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>Held, against the Drowned</td><td class="n">13 hits</td></tr>
+              <tr><td>Held, against Brine Hounds</td><td class="n">30 bites</td></tr>
+              <tr><td>Held, three Drowned swinging at once</td><td class="n">about 4.4 s</td></tr>
+              <tr><td>Stowed, hits from behind (half soaked)</td><td class="n">26 hits</td></tr>
+              <tr><td>Repair when broken</td><td class="n">750 (top-ups from 150)</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li>The user made two calls from the design: hold Q to raise it (instead of a toggle), and 750 to repair it.</li>
+          <li>Bashing works as crowd control more than damage. A round-10 Drowned takes 11 bashes to kill.</li>
+        </ul>
+        <div class="shots">
+          <figure><img src="shots/m3s4_shield_raised.jpg" alt="The Driftwood Shield raised in front of the player, wooden planks with an amber net strap, a Drowned reaching over it; a Shield durability bar on the HUD" width="1280" height="720" loading="lazy"><figcaption>Shield up, with a Drowned reaching over it. The durability bar sits next to the perk slots.</figcaption></figure>
+          <figure><img src="shots/m3s4_workbench_build.jpg" alt="A workbench close-up with a progress bar reading Building the Driftwood Shield and a HUD line Shield 3/3 - build at a workbench" width="1280" height="720" loading="lazy"><figcaption>All three parts found. Holding E at the workbench.</figcaption></figure>
+        </div>
+        <div class="how">
+          <p class="eyebrow">How it was built</p>
+          <p>Design first (b373d5d), with the user's two choices recorded in the commit. Enemy melee now passes the attacker's position through a damage filter on the player, so the shield can tell a front hit from a back hit.</p>
+          <p><b>The mystery drain.</b> In playtesting, the stowed shield kept losing durability to hits that looked like they came from the side. It wasn't a bug. If you strafe while a Drowned is mid-swing, by the time the blow lands it's behind you, and the stowed shield soaks it as designed. The fix was feedback, not code: a back-thud sound and an amber flash on the HUD, so you can tell when your back just got saved.</p>
+          <div class="stats">
+            <div class="stat"><b>+27</b><span>new EditMode tests</span></div>
+            <div class="stat"><b>365</b><span>tests passing</span></div>
+            <div class="stat"><b>120°</b><span>front cone</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: M3 slice 3 -->
+    <article class="entry" id="m3-slice-3">
+      <div class="when"><span class="t">19:16</span><span>22 Nov 2026</span><span class="hash">1a03a74</span></div>
+      <div class="e-body">
+        <p class="kicker">Milestone 3 · slice 3 of 4</p>
+        <h3>Brine Hound rounds</h3>
+        <p>Every so often the Drowned stay away. A howl warns you, a <b>BRINE TIDE</b> banner comes up, teal fog rolls in, and fast four-legged hounds burst out of brine pools in packs. They skip the windows and run straight at you, but a closed door still stops them. Kill the last one and it leaves a guaranteed Full Refill.</p>
+        <div class="numbers">
+          <table>
+            <thead><tr><th>Brine Hound</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>First tide</td><td class="n">round 6 or 7, then every 5–7 rounds</td></tr>
+              <tr><td>Speed</td><td class="n">6.5 m/s (a sprinting Drowned does 5)</td></tr>
+              <tr><td>Health</td><td class="n">about 0.35× a Drowned's</td></tr>
+              <tr><td>Bite</td><td class="n">a lunge for 20</td></tr>
+              <tr><td>Packs</td><td class="n">2–4, from 18 brine pools at least 14 m away</td></tr>
+              <tr><td>Reward</td><td class="n">70 a kill, 0.7× shards, Full Refill, +250 for a clean sweep</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li>A hound that can't reach you escapes, so the round always ends. Let one escape and you miss the +250.</li>
+          <li>Also fixed: enemies now keep a minimum distance from the player, so a crowd can no longer shove you along a wall.</li>
+        </ul>
+        <div class="shots">
+          <figure><img src="shots/m3s3_hound_pack.jpg" alt="Two small teal hounds standing on a glowing brine pool at the far side of a fog-tinted yard" width="1280" height="720" loading="lazy"><figcaption>A pack climbs out of a brine pool under the teal fog.</figcaption></figure>
+          <figure><img src="shots/m3s3_hound_chasing.jpg" alt="Two blocky four-legged teal hounds with white eyes running at the player across the yard" width="1280" height="720" loading="lazy"><figcaption>Seconds later they're on you.</figcaption></figure>
+        </div>
+        <div class="how">
+          <p class="eyebrow">How it was built</p>
+          <p>The design went in as its own commit first. The hound is a variant of the Drowned prefab with its own pool, and the schedule, spawner and pool-picking rules are plain C#. The sound generator gained a howl, a growl, a bark and a splash.</p>
+          <div class="stats">
+            <div class="stat"><b>+32</b><span>new EditMode tests</span></div>
+            <div class="stat"><b>338</b><span>tests passing</span></div>
+            <div class="stat"><b>18</b><span>brine pools</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: knife -->
+    <article class="entry" id="knife">
+      <div class="when"><span class="t">16:05</span><span>22 Nov 2026</span><span class="hash">75b3b7d</span></div>
+      <div class="e-body">
+        <p class="kicker">Polish</p>
+        <h3>A knife you can see</h3>
+        <p>Pressing V used to deal damage with nothing on screen. Now the held gun dips aside and a chunky knife thrusts in from the lower right, alternating swipes. The whole stab takes 0.43 s, and the damage lands once, at the peak of the thrust, with a camera jolt. You can't fire, aim or start a reload mid-stab. 11 new tests.</p>
+        <div class="shots">
+          <figure class="wide"><img src="shots/knife_pistol_peak.jpg" alt="Close-up of the greybox knife at full thrust into a pale Drowned, with two more Drowned behind it; HUD hint reads Relight the lighthouse" width="1280" height="720" loading="lazy"><figcaption>The knife at the peak of its thrust, right where the damage lands.</figcaption></figure>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: tuning -->
+    <article class="entry" id="tuning-1">
+      <div class="when"><span class="t">15:51</span><span>22 Nov 2026</span><span class="hash">1a3d766</span></div>
+      <div class="e-body">
+        <p class="kicker">Tuning · from the first hand playtest</p>
+        <h3>Softer early rounds, more level-ups</h3>
+        <p>The first tuning from the user's own runs. The opening rounds were a slog with the pistol, so the Drowned start weaker and catch up later. Star shards are now worth 1.5× as much XP, so level-ups come more often.</p>
+        <div class="numbers">
+          <table>
+            <thead><tr><th>Drowned health</th><th>R1</th><th>R2</th><th>R3</th><th>R4</th><th>R20</th></tr></thead>
+            <tbody>
+              <tr><td>Before</td><td class="n">150</td><td class="n">250</td><td class="n">350</td><td class="n">450</td><td class="n">~2,710</td></tr>
+              <tr><td>After</td><td class="n">100</td><td class="n">150</td><td class="n">200</td><td class="n">250</td><td class="n">~2,480</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>With the pistol that's 3–7 body shots in the first four rounds instead of 4–12. Shard XP per kill goes to 15, 21 for a headshot and 30 for the knife.</p>
+      </div>
+    </article>
+
+    <!-- ENTRY: M3 slice 2 -->
+    <article class="entry" id="m3-slice-2">
+      <div class="when"><span class="t">15:29</span><span>22 Nov 2026</span><span class="hash">8908eb1</span></div>
+      <div class="e-body">
+        <p class="kicker">Milestone 3 · slice 2 of 4</p>
+        <h3>Relight the lighthouse</h3>
+        <p>Every run now starts in the dark. The perk machines and the Star Anvil sit dead until you reach the lighthouse switch, 62 m from spawn through the chapel. Throwing it starts a 20-second warm-up: stay within 12 m while the Drowned surge from the Lighthouse windows. Leave or go down and the warm-up pauses. When it finishes, the lamp glows, the beam starts sweeping the bay, the machines across town fade on one by one, and a gold banner and new sounds mark the moment.</p>
+        <ul>
+          <li>The user chose the 20 s hold under pressure from the options the designer gave. Second Wind now needs power too.</li>
+          <li>Machines only work once they're fully on, so there's no buying a perk mid-fade.</li>
+          <li>The lamp and beam are exposed for Milestone 4, where the beam reveals the Starbow's star-glass at low tide.</li>
+        </ul>
+        <div class="shots">
+          <figure class="wide"><img src="shots/m3s2_lh_beam.jpg" alt="The lighthouse tower seen from Chapel Row, with two pale beams sweeping out from its lit lamp" width="1280" height="720" loading="lazy"><figcaption>Lit. The beam seen from Chapel Row.</figcaption></figure>
+        </div>
+        <div class="how">
+          <p class="eyebrow">How it was built</p>
+          <p>Design first, with the user's choice recorded in the commit. The warm-up timer is a small plain-C# <span class="mono">WarmProgress</span> class, and the surge reuses the spawn rules by weighting the Lighthouse windows.</p>
+          <div class="stats">
+            <div class="stat"><b>+16</b><span>new EditMode tests</span></div>
+            <div class="stat"><b>20 s</b><span>warm-up hold</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: M3 slice 1 -->
+    <article class="entry" id="m3-slice-1">
+      <div class="when"><span class="t">13:58</span><span>22 Nov 2026</span><span class="hash">bafa4a5</span></div>
+      <div class="e-body">
+        <p class="kicker">Milestone 3 · slice 1 of 4</p>
+        <h3>The whole town</h3>
+        <p>The three-room greybox became the town of Lanternfall: eight areas around the Harbour hub, about 140 × 120 m. The Sunken Tunnels run 4 m under the town and link three areas by stairs. The tunnels lead to the Crater Shallows, where the Star Anvil now sits, behind the 2000-point Starfall gate. Every perk machine, wall buy and chest dock was placed again. Markers are already down for the workbenches, shield parts and Starbow quests to come.</p>
+        <div class="numbers">
+          <table>
+            <thead><tr><th>Route</th><th>Distance</th><th>Walk</th><th>Sprint</th></tr></thead>
+            <tbody>
+              <tr><td>Spawn to the first doors</td><td class="n">16–17 m</td><td class="n">4 s</td><td class="n">2 s</td></tr>
+              <tr><td>Spawn to the lighthouse switch</td><td class="n">62 m</td><td class="n">14 s</td><td class="n">8 s</td></tr>
+              <tr><td>Spawn to the Star Anvil</td><td class="n">120 m</td><td class="n">27 s</td><td class="n">16 s</td></tr>
+              <tr><td>Lighthouse switch to the Anvil</td><td class="n">181 m</td><td class="n">40 s</td><td class="n">24 s</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li><b>11 doors</b> cost 750 to 2000, and there are 30 windows for the Drowned to break through.</li>
+          <li><b>Smarter spawning:</b> the Drowned come through the nearest windows, never too close, and prefer the area you're in. Windows on another floor count for less.</li>
+          <li><b>A NavMesh fix:</b> the bake used to run before the "don't walk here" markers had registered, so enemies could walk on top of props. It now waits for them.</li>
+        </ul>
+        <div class="shots">
+          <figure class="wide"><img src="shots/m3s1_town_overview.jpg" alt="Top-down view of the greybox town: the lighthouse at the top, Chapel Row with its chapel below it, the Sea Wall to the left, Salt Flats and the Cannery to the right, the Harbour in the middle, tunnels underneath, and the glowing crater to the lower right" width="1600" height="1400" loading="lazy"><figcaption>The whole town from above. The Lighthouse is at the top, then Chapel Row and the Harbour. The Sea Wall is on the left, the Salt Flats and Cannery on the right. The tunnels run underneath to the crater, bottom right.</figcaption></figure>
+        </div>
+        <div class="how">
+          <p class="eyebrow">How it was built</p>
+          <p>A new <b>level-designer</b> agent joined the pipeline for this slice. It wrote <span class="mono">Docs/Design/Map.md</span>: a top-down sketch, sizes, walking times and exact coordinates for every wall, door and machine. The user approved it before any building started. The map builder then grew to generate the whole town.</p>
+          <p><b>Lesson learned:</b> recompiling scripts while Unity was in Play mode froze the Editor partway through this slice. The work was saved in a checkpoint commit (45836af) before the Editor was recovered. Now every agent checks for Play mode before touching code or assets.</p>
+          <div class="stats">
+            <div class="stat"><b>+11</b><span>new EditMode tests</span></div>
+            <div class="stat"><b>8</b><span>areas</span></div>
+            <div class="stat"><b>~6,700 m²</b><span>of floor, tunnels included</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: game feel pass -->
+    <article class="entry" id="feel-pass">
+      <div class="when"><span class="t">23:04</span><span>21 Nov 2026</span><span class="hash">9ff1112</span></div>
+      <div class="e-body">
+        <p class="kicker">Between milestones · game feel</p>
+        <h3>Adding weight to the gunplay</h3>
+        <p>With Milestone 2 done, the systems all worked, but shooting felt quiet and flat. This pass is about feel: every shot, hit and kill should be seen, heard and felt, while holding 60 fps with 24 Drowned on screen. Everything here is pooled, unlit and uses no lights.</p>
+        <ul>
+          <li><b>Sound, from scratch.</b> 37 placeholder sound effects, all synthesized by a 507-line Python script using only the standard library, never downloaded. Each gun has its own shot, plus reloads, hits, headshot cracks, groaning Drowned, every machine and pickup, and round start and end stingers. A pooled player caps how many voices play at once.</li>
+          <li><b>Shots:</b> a star-shaped muzzle flash, screen shake that builds up and decays (aiming ignores it), a springy kick on the gun model, and a wider field of view on heavy guns.</li>
+          <li><b>Hits:</b> a spray of teal sea-water off the Drowned, bigger on headshots. They flinch and get knocked back, both capped so you can't stun-lock them. Damage numbers are colour-coded: white for normal, yellow for headshots, gold for Lucky Strike crits, orange for explosions.</li>
+          <li><b>Kills:</b> the body swells, squashes flat and bursts into low-poly chunks with a wet pop. Headshot kills and 400+ damage hits get a 30 ms hit-stop.</li>
+          <li><b>A bug fix on the way:</b> a big enough crowd could push the player through walls. Not any more.</li>
+        </ul>
+        <div class="numbers">
+          <table>
+            <thead><tr><th>Gun</th><th>Shake</th><th>Kick pitch</th><th>FOV punch</th><th>Knockback</th></tr></thead>
+            <tbody>
+              <tr><td>Gullscatter Shotgun</td><td class="n">0.42</td><td class="n">10°</td><td class="n">3.5</td><td class="n">0.9</td></tr>
+              <tr><td>Longshore Harpoon</td><td class="n">0.38</td><td class="n">7.5°</td><td class="n">3</td><td class="n">0.8</td></tr>
+              <tr><td>Tidewater Carbine</td><td class="n">0.24</td><td class="n">6°</td><td class="n">0.8</td><td class="n">0.15</td></tr>
+              <tr><td>Brass Pistol</td><td class="n">0.16</td><td class="n">4.5°</td><td class="n">0</td><td class="n">0</td></tr>
+              <tr><td>Breaker Rifle</td><td class="n">0.11</td><td class="n">2.2°</td><td class="n">0.5</td><td class="n">0</td></tr>
+              <tr><td>Barnacle Drum</td><td class="n">0.09</td><td class="n">1.9°</td><td class="n">0.3</td><td class="n">0.05</td></tr>
+              <tr><td>Rattler SMG</td><td class="n">0.07</td><td class="n">1.6°</td><td class="n">0</td><td class="n">0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="shots">
+          <figure class="wide"><img src="shots/feel_fx_fight3.jpg" alt="Close-up of a Drowned hit by the Rattler SMG: a teal spray at the head, a yellow 64 headshot number above a white 32, and a small star-shaped muzzle flash" width="869" height="412" loading="lazy"><figcaption>Rattler SMG at close range: teal spray, a yellow 64 for the headshot over a white 32, and the muzzle star.</figcaption></figure>
+          <figure><img src="shots/feel_fx_fight2.jpg" alt="A crowd of the Drowned at point-blank range with dark teal low-poly chunks flying from a kill" width="869" height="412" loading="lazy"><figcaption>Death chunks mid-pop in a round 2 crowd.</figcaption></figure>
+          <figure><img src="shots/feel_fx_flash_test.jpg" alt="The Gullscatter Shotgun firing into the Drowned with two large cream star-shaped muzzle flashes" width="1280" height="720" loading="lazy"><figcaption>The shotgun's muzzle flash, the biggest in the game.</figcaption></figure>
+        </div>
+        <div class="how">
+          <p class="eyebrow">How it was built</p>
+          <p>The pure maths went into small plain-C# classes with tests: the trauma shake, spring kick, flinch and hit-stop. Every knob lives in one <span class="mono">FeelConfig</span> asset, plus a Feel section on each gun's data, so tuning never needs code. The map builder wires it all up and keeps hand-tuned numbers on later runs. Stress check: 24 Drowned plus a Shockwave held about 56–61 fps in a background Editor, capped at 60.</p>
+          <div class="stats">
+            <div class="stat"><b>+24</b><span>new EditMode tests</span></div>
+            <div class="stat"><b>245</b><span>tests passing</span></div>
+            <div class="stat"><b>37</b><span>generated sounds</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: M2 slice 5 -->
+    <article class="entry" id="m2-slice-5">
+      <div class="when"><span class="t">22:10</span><span>21 Nov 2026</span><span class="hash">8e5b38d</span></div>
+      <div class="e-body">
+        <p class="kicker">Milestone 2 · slice 5 of 5 · milestone complete</p>
+        <h3>Star shards and level-ups</h3>
+        <p>The second layer of build-up is in. Every kill bursts into small cyan chips of star-glass. Get within 3 m and they fly to you, and at the end of a round every shard left on the ground is pulled in, so no XP goes to waste. Fill the bar and the game pauses on a <b>STAR RISING</b> panel: pick one of three upgrades with 1, 2, 3 or a click. Upgrades stay when you go down (perks don't) and reset when the run ends.</p>
+        <div class="numbers">
+          <table>
+            <thead><tr><th>Rarity</th><th>Upgrades (16, all original)</th></tr></thead>
+            <tbody>
+              <tr><td>Common</td><td>Quick Cords (fire rate), Brine-Soaked Rounds (damage), Dry Gloves (reload), Sea Legs (speed), Oilskin Coat (+10 health), Lodestone Pocket (magnet), Haggler's Tally (+5% points)</td></tr>
+              <tr><td>Rare</td><td>Gull's Eye (headshots), Lucky Strike (double-damage hits), Leech Hook (headshot kills heal), Wick and Tallow (faster regen)</td></tr>
+              <tr><td>Epic</td><td>Powder Keg Tide (kills can burst), Skipping Stone (ricochets from any gun), Cellarmaster (damage per perk held), Forgeheart (boosts your forged gun)</td></tr>
+              <tr><td>Legendary</td><td>Starfall Salvo: every 25th kill calls down 3 stars for 400 damage each</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li><b>Shard values:</b> 10 XP for a kill, 14 for a headshot, 20 for a knife kill. Shockwave kills give none.</li>
+          <li><b>Pacing:</b> the first level comes during round 2, then roughly one per round. By round 10 you've made 8 or 9 choices.</li>
+          <li><b>Rarity grows with level.</b> At level 1 the odds are 72% Common, 24% Rare, 4% Epic. Legendaries can show up from level 5.</li>
+          <li><b>Shard Storm</b>, waiting since slice 1, now drops: 12 shards burst around you, worth about half a level.</li>
+          <li><b>The guardrail:</b> all your upgrades together stay weaker than one perk or one Anvil forge. Shards are the spice, not the meal.</li>
+        </ul>
+        <div class="shots">
+          <figure class="wide"><img src="shots/m2s5_sh_b.jpg" alt="The STAR RISING level-up panel with three Common cards: Lodestone Pocket, Haggler's Tally and Quick Cords, each showing Stack 1" width="1280" height="720" loading="lazy"><figcaption>STAR RISING: the game pauses while you choose one of three.</figcaption></figure>
+          <figure class="wide"><img src="shots/m2s5_sh_a.jpg" alt="Five cyan star shards floating above the floor in the harbour, with the LV 0 XP bar at the bottom of the HUD" width="1280" height="720" loading="lazy"><figcaption>Shards on the ground, and the new XP bar at the bottom of the HUD.</figcaption></figure>
+        </div>
+        <div class="how">
+          <p class="eyebrow">How it was built</p>
+          <p>The largest slice so far, at 2,169 lines in <span class="mono">Scripts/Shards/</span>. The design doc works out the XP curve round by round, and spells out how run upgrades multiply with perks rather than replace them. Live shards are capped at 40: past that, new XP merges into the oldest shard, which grows and changes colour. Nothing is allocated per frame. A new <span class="mono">InputGate</span> blocks gameplay input while the panel is open without cancelling a reload.</p>
+          <div class="stats">
+            <div class="stat"><b>+31</b><span>new EditMode tests</span></div>
+            <div class="stat"><b>221</b><span>tests passing</span></div>
+            <div class="stat"><b>16</b><span>run upgrades</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: frame cap -->
+    <article class="entry" id="fps-cap">
+      <div class="when"><span class="t">21:44</span><span>21 Nov 2026</span><span class="hash">4945bbf</span></div>
+      <div class="e-body">
+        <p class="kicker">Tech</p>
+        <h3>Capped at 60 fps</h3>
+        <p>A 21-line change: vSync off and a target frame rate of 60. The Editor was rendering as fast as it could and heating the laptop. 60 fps is also the game's performance target, so now it's the ceiling too.</p>
+      </div>
+    </article>
+
+    <!-- ENTRY: M2 slice 4 -->
+    <article class="entry" id="m2-slice-4">
+      <div class="when"><span class="t">21:41</span><span>21 Nov 2026</span><span class="hash">d87d77c</span></div>
+      <div class="e-body">
+        <p class="kicker">Milestone 2 · slice 4 of 5</p>
+        <h3>The Star Anvil</h3>
+        <p>A shard of the fallen star, violet glass wedged into a ship's anchor, now sits in the Cannery. Pay 5000 and it takes the gun you're holding, rings three times over three seconds, and hands back a star-forged version with a new name, more damage, a bigger magazine and a random element. Another 2500 re-rolls the element, and it never gives you the same one twice. A forged gun waits on the anvil until you take it, so a 5000-point upgrade can never be lost.</p>
+        <div class="numbers">
+          <table>
+            <thead><tr><th>Base gun</th><th>Forged name</th><th>Damage</th><th>Magazine</th></tr></thead>
+            <tbody>
+              <tr><td>Brass Pistol</td><td>Starbrass Pistol</td><td class="n">×1.8</td><td class="n">8 → 12</td></tr>
+              <tr><td>Rattler SMG</td><td>Comet Rattler</td><td class="n">×1.7</td><td class="n">32 → 48</td></tr>
+              <tr><td>Gullscatter Shotgun</td><td>Gullstorm Shotgun</td><td class="n">×1.6</td><td class="n">6 → 8</td></tr>
+              <tr><td>Tidewater Carbine</td><td>Moontide Carbine</td><td class="n">×1.6</td><td class="n">12 → 18</td></tr>
+              <tr><td>Breaker Rifle</td><td>Starbreaker Rifle</td><td class="n">×1.6</td><td class="n">30 → 40</td></tr>
+              <tr><td>Barnacle Drum</td><td>Nova Drum</td><td class="n">×1.5</td><td class="n">100 → 150</td></tr>
+              <tr><td>Longshore Harpoon</td><td>Fallstar Harpoon</td><td class="n">×1.5</td><td class="n">5 → 7</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li><b>Four elements</b>, rolled on hit: <b>Burn</b> (damage over time), <b>Chill</b> (40% slow), <b>Chain-shock</b> (arcs to 2 nearby enemies) and <b>Ricochet</b> (2 bounces, needs line of sight).</li>
+          <li>The weakest gun gets the biggest boost. A Starbrass Pistol is a fun buy, not the best one.</li>
+          <li>A forged gun does roughly 55–80% more damage before its element. Zombie health still outgrows it after about round 25.</li>
+        </ul>
+        <div class="shots">
+          <figure><img src="shots/m2s4_an_anvil.jpg" alt="The Star Anvil: a pink star-glass shard on a dark anvil beside an anchor post, prompt reads Forge Brass Pistol into Starbrass Pistol (5000)" width="1280" height="720" loading="lazy"><figcaption>The Anvil in the Cannery, offering to forge the Brass Pistol.</figcaption></figure>
+          <figure><img src="shots/m2s4_an_chain.jpg" alt="Three of the Drowned approaching the anvil; the prompt offers a 2500 re-roll and shows the current element, Chain-shock; the HUD shows Starbrass Pistol 11/120" width="1280" height="720" loading="lazy"><figcaption>Forged: a Chain-shock Starbrass Pistol with a 12-round mag, and the Drowned closing in.</figcaption></figure>
+        </div>
+        <div class="how">
+          <p class="eyebrow">How it was built</p>
+          <p>The second slice on the lean pipeline. The design doc works out shots-to-kill and damage per gun at rounds 10, 15 and 20 before a line of code. The upgrade lives in a runtime <span class="mono">WeaponUpgrade</span> on the gun, so the base weapon data stays the gun's identity. Elements are a new damage kind with a pooled status system. It's the largest system in the game so far, at 1,580 lines.</p>
+          <div class="stats">
+            <div class="stat"><b>+19</b><span>new EditMode tests</span></div>
+            <div class="stat"><b>193</b><span>tests passing</span></div>
+            <div class="stat"><b>4</b><span>elements</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: M2 slice 3 -->
+    <article class="entry" id="m2-slice-3">
+      <div class="when"><span class="t">02:20</span><span>21 Nov 2026</span><span class="hash">c8190f2</span></div>
+      <div class="e-body">
+        <p class="kicker">Milestone 2 · slice 3 of 5</p>
+        <h3>The Castaway Chest</h3>
+        <p>A salt-crusted sea chest from a drowned ship, chained to a dock post. For 950 points the lid glows lantern-gold and guns spin above it for 3.5 seconds before one lands. You have 10 seconds to take it. You never roll a gun you already hold, and the pistol isn't in the pool. The chest is the only place to find two new guns: the <b>Barnacle Drum</b> and the <b>Longshore Harpoon</b>, whose shots pierce through a line of enemies.</p>
+        <ul>
+          <li><b>The tide takes it.</b> After 4 to 8 uses a gull can turn up instead of a gun. You get your 950 back, the tide pulls the chest off the dock, and 20 seconds later it washes up at another dock.</li>
+          <li>The leave chance starts at 35% and rises 20% with each roll after that. On average the chest gives about 5 guns before it moves.</li>
+          <li><b>Four docks:</b> Fish Quay, Net Landing, Chapel Steps and Loading Dock, each marked with a faint lantern post. It only moves to docks in areas you've opened, so opening doors gives it more places to go.</li>
+          <li>If you buy the rolled gun off a wall while the chest is still open, it refunds you instead.</li>
+        </ul>
+        <div class="shots">
+          <figure class="wide"><img src="shots/m2s3_ch_roll2.jpg" alt="The Barnacle Drum, a drum-fed gun, floating above the open, glowing Castaway Chest on a dock" width="1280" height="720" loading="lazy"><figcaption>The Barnacle Drum floating over the open chest, one of the two chest-only guns.</figcaption></figure>
+        </div>
+        <div class="how">
+          <p class="eyebrow">How it was built</p>
+          <p>The first slice on the lean pipeline. The gameplay-programmer wrote its own tests for the plain-C# <span class="mono">ChestRules</span> (rolls, the gull, where it moves, refunds), and the playtest and review were short. The Harpoon needed a new piercing shot, added as <span class="mono">pierceCount</span> on the weapon data with its own <span class="mono">PierceMath</span>.</p>
+          <div class="stats">
+            <div class="stat"><b>+19</b><span>new EditMode tests</span></div>
+            <div class="stat"><b>174</b><span>tests passing</span></div>
+            <div class="stat"><b>2</b><span>chest-only guns</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: lean pipeline -->
+    <article class="entry" id="lean-pipeline">
+      <div class="when"><span class="t">01:53</span><span>21 Nov 2026</span><span class="hash">1236274</span></div>
+      <div class="e-body">
+        <p class="kicker">Tooling</p>
+        <h3>A leaner pipeline</h3>
+        <p>Two slices in, the full five-agent pipeline was spending a lot of tokens per feature. Now the gameplay-programmer writes focused tests itself, the test-writer only runs on request, and the playtest is a short smoke test of 3–4 checks. The playtester and code-reviewer run on the cheaper Sonnet model, side by side. The Stop hook still compiles the project and runs every test before a session can finish, so the safety net is unchanged.</p>
+      </div>
+    </article>
+
+    <!-- ENTRY: M2 slice 2 -->
+    <article class="entry" id="m2-slice-2">
+      <div class="when"><span class="t">01:45</span><span>21 Nov 2026</span><span class="hash">a186c91</span></div>
+      <div class="e-body">
+        <p class="kicker">Milestone 2 · slice 2 of 5</p>
+        <h3>Perk machines</h3>
+        <p>Six perk machines, two in each area, each with its own colour and letter on the HUD. You can hold four at once, and going down loses them all. Going down is new too. Before this slice, hitting zero health just ended the run. With Second Wind you drop for 4 seconds instead, then get back up at full health with 3 seconds of invulnerability. The lighthouse doesn't have power yet, so every machine is switched on until Milestone 3.</p>
+        <div class="numbers">
+          <table>
+            <thead><tr><th>Perk</th><th>Effect</th><th>Cost</th></tr></thead>
+            <tbody>
+              <tr><td>Stout Heart</td><td>Max health 100 → 150</td><td class="n">2500</td></tr>
+              <tr><td>Quickhand Tonic</td><td>Reload time ×0.6</td><td class="n">3000</td></tr>
+              <tr><td>Second Wind</td><td>Self-revive when downed, 3 per run</td><td class="n">1500</td></tr>
+              <tr><td>Deadeye Draught</td><td>Headshot damage ×1.5, faster aiming</td><td class="n">2000</td></tr>
+              <tr><td>Deckhand's Grog</td><td>Carry a third gun</td><td class="n">4000</td></tr>
+              <tr><td>Gale Draught</td><td>Sprint 7.5 → 9 m/s, and fire while sprinting</td><td class="n">2000</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li>The Drowned hit for 45, so 100 health takes 3 hits and Stout Heart's 150 takes 4. That's one more mistake allowed, so regen still matters.</li>
+          <li>With Deadeye, one pistol headshot kills a round-1 zombie (two without it).</li>
+          <li>Lose Deckhand's Grog and you lose whatever gun is in the third slot.</li>
+        </ul>
+        <div class="shots">
+          <figure><img src="shots/m2s2_pk_hud_max.jpg" alt="A violet perk machine with the prompt Max perks (4); four coloured perk letters G, S, Q and L on the HUD" width="1280" height="720" loading="lazy"><figcaption>Four perks held: the machine says no more.</figcaption></figure>
+          <figure><img src="shots/m2s2_pk_downed.jpg" alt="A tilted, red-tinted view from the floor with a Second Wind progress bar in the centre and empty perk slots" width="1280" height="720" loading="lazy"><figcaption>Downed. Second Wind ticks up, and the perk row is already empty.</figcaption></figure>
+        </div>
+        <div class="how">
+          <p class="eyebrow">How it was built</p>
+          <p>The last slice through the full five-agent pipeline. Before writing the spec, the game-designer checked the code for what already existed. It found there was no downed state at all, and that sprint was already unlimited. One call went to the user: what going down should feel like. The answer was 4 helpless seconds, revive at full health, no shove. Each machine's position on the map was checked against walls, windows and props.</p>
+          <div class="stats">
+            <div class="stat"><b>+55</b><span>new EditMode tests</span></div>
+            <div class="stat"><b>155</b><span>tests passing</span></div>
+            <div class="stat"><b>6</b><span>perks</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: M2 slice 1 -->
+    <article class="entry" id="m2-slice-1">
+      <div class="when"><span class="t">01:14</span><span>21 Nov 2026</span><span class="hash">fe96e1b</span></div>
+      <div class="e-body">
+        <p class="kicker">Milestone 2 · slice 1 of 5</p>
+        <h3>Power-up drops</h3>
+        <p>Now and then a kill leaves something behind: a spinning, bobbing shape you run over to grab. Five drops work today. Each has its own colour and its own shape, so they read apart even for colour-blind players. A sixth, Shard Storm, is in place but switched off until star shards exist.</p>
+        <div class="numbers">
+          <table>
+            <thead><tr><th>Drop</th><th>What it does</th><th>Shape</th><th>Weight</th></tr></thead>
+            <tbody>
+              <tr><td><span class="sw" style="background:#e8c63a"></span>Double Points</td><td>2× points for 30 s</td><td>Gold cube</td><td class="n">25</td></tr>
+              <tr><td><span class="sw" style="background:#e65a4f"></span>Kill Frenzy</td><td>Every hit kills for 30 s</td><td>Red octahedron</td><td class="n">20</td></tr>
+              <tr><td><span class="sw" style="background:#5ccf6f"></span>Full Refill</td><td>Both guns to max ammo</td><td>Green capsule</td><td class="n">20</td></tr>
+              <tr><td><span class="sw" style="background:#d9dde0;border:1px solid var(--rule)"></span>Shockwave</td><td>Kills every enemy alive, flat +200</td><td>White sphere</td><td class="n">15</td></tr>
+              <tr><td><span class="sw" style="background:#6a9cf0"></span>Carpenter's Bell</td><td>Rebuilds every barricade, flat +100</td><td>Blue bell</td><td class="n">20</td></tr>
+              <tr><td><span class="sw" style="background:#5fd6dc"></span>Shard Storm</td><td>Burst of XP (waits for slice 5)</td><td>Cyan star</td><td class="n">0</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li><b>4% chance per kill</b>, with a pity rule: after 30 kills without a drop, the next kill always drops.</li>
+          <li>At most <b>2 drops a round</b> (3 from round 10). None in round 1. Never the same drop twice in a row.</li>
+          <li>A drop that would do nothing is never rolled: no Refill when your ammo is full, no Shockwave with fewer than 5 enemies up.</li>
+          <li>Drops last 30 s and blink for the last 8. Walk within 1.5 m to collect.</li>
+        </ul>
+        <div class="shots">
+          <figure class="wide"><img src="shots/m2s1_pu1_spread.jpg" alt="All six power-up shapes lined up in the greybox harbour: gold cube, red octahedron, green capsule, white sphere, blue bell, cyan star" width="1280" height="720" loading="lazy"><figcaption>The full set, force-spawned for the playtest: Double Points, Kill Frenzy, Full Refill, Shockwave, Carpenter's Bell and the dormant Shard Storm.</figcaption></figure>
+          <figure><img src="shots/m2s1_pu1_collect.jpg" alt="Three of the Drowned near a window with a DOUBLE POINTS banner and a 29-second timer on the HUD" width="1280" height="720" loading="lazy"><figcaption>Double Points picked up: banner at the top, 29 s left bottom-left.</figcaption></figure>
+          <figure><img src="shots/m2s1_pu6_shock.jpg" alt="An empty room after a SHOCKWAVE banner, with +200 points shown on the HUD in round 4" width="1280" height="720" loading="lazy"><figcaption>Shockwave in round 4: the room is clear and the flat +200 lands.</figcaption></figure>
+          <figure class="wide"><img src="shots/m2s1_pu3_frenzy.jpg" alt="Two of the Drowned filling the screen over a game-over panel reading You were drowned" width="1280" height="720" loading="lazy"><figcaption>Not every playtest goes well. The game-over screen from M1, caught while testing Kill Frenzy.</figcaption></figure>
+        </div>
+        <div class="how">
+          <p class="eyebrow">How it was built</p>
+          <p>The first slice through the full <span class="mono">/build-feature</span> pipeline. The game-designer wrote the spec in <span class="mono">Docs/Design/PowerUps.md</span>: drop table, drop odds simulated per round, and the exact hook points in existing code. The gameplay-programmer kept the rules in plain C# classes (<span class="mono">PowerUpDropRules</span>, <span class="mono">PowerUpTimers</span>) behind a thin <span class="mono">PowerUpManager</span>, with pooled pickups and all numbers in a <span class="mono">PowerUpConfig</span> asset. The test-writer covered drop odds, pity, caps and timers. The playtester force-spawned every drop in the running game to take the screenshots above.</p>
+          <div class="stats">
+            <div class="stat"><b>+53</b><span>new EditMode tests</span></div>
+            <div class="stat"><b>100</b><span>tests passing</span></div>
+            <div class="stat"><b>6</b><span>drop types</span></div>
+          </div>
+        </div>
+        <details>
+          <summary>Still open after this slice</summary>
+          <ul>
+            <li>Should timers pause between rounds? For now they keep ticking.</li>
+            <li>Should Kill Frenzy pay a bonus per kill, since hits stop paying 10?</li>
+            <li>The Shockwave and Bell rewards (200 and 100) are guesses until a human plays it.</li>
+          </ul>
+        </details>
+      </div>
+    </article>
+
+    <!-- ENTRY: pipeline -->
+    <article class="entry" id="pipeline-setup">
+      <div class="when"><span class="t">00:54</span><span>21 Nov 2026</span><span class="hash">a804803</span></div>
+      <div class="e-body">
+        <p class="kicker">Tooling</p>
+        <h3>The agent pipeline</h3>
+        <p>With the core loop working, the way of building changed. The <span class="mono">/build-feature</span> skill now runs design, build, test, playtest and review as one loop. A Stop hook recompiles the project in the open Unity Editor and runs the EditMode tests whenever C# changed, and blocks the session from finishing if anything fails. Every slice of Milestone 2 goes through this.</p>
+      </div>
+    </article>
+
+    <!-- ENTRY: M1 -->
+    <article class="entry" id="m1">
+      <div class="when"><span class="t">00:50</span><span>21 Nov 2026</span><span class="hash">9f6ce2e</span></div>
+      <div class="e-body">
+        <p class="kicker">Milestone 1 · done</p>
+        <h3>The core loop</h3>
+        <p>Lanternfall became a game. The Drowned spawn outside, tear boards off the windows, climb in and chase you across a NavMesh. Rounds get bigger and faster, every hit pays, and points open doors and buy guns off the walls. A generated greybox map lays out the Harbour, Chapel Row and the Cannery.</p>
+        <ul>
+          <li><b>The Drowned:</b> barricade breach, climb, NavMesh chase, melee. Up to 24 alive at once, all pooled. Shamble at 1.5 m/s, later run at 3.6 and sprint at 5.</li>
+          <li><b>Rounds:</b> count, health and speed scale per round, with a 10-second break between.</li>
+          <li><b>You:</b> two gun slots, a knife, health that regenerates, and a game-over screen with your stats.</li>
+        </ul>
+        <div class="numbers">
+          <table>
+            <thead><tr><th>Points</th><th></th><th>Wall guns</th><th></th><th>Doors</th><th></th></tr></thead>
+            <tbody>
+              <tr><td>Start</td><td class="n">500</td><td>Brass Pistol</td><td class="n">300</td><td>Debris to Chapel Row</td><td class="n">750</td></tr>
+              <tr><td>Hit</td><td class="n">+10</td><td>Tidewater Carbine</td><td class="n">500</td><td>Cannery gate</td><td class="n">1000</td></tr>
+              <tr><td>Kill</td><td class="n">+50</td><td>Rattler SMG</td><td class="n">1000</td><td></td><td></td></tr>
+              <tr><td>Headshot kill</td><td class="n">+100</td><td>Gullscatter Shotgun</td><td class="n">1200</td><td></td><td></td></tr>
+              <tr><td>Knife kill</td><td class="n">+130</td><td>Breaker Rifle</td><td class="n">1400</td><td></td><td></td></tr>
+              <tr><td>Board repaired</td><td class="n">+10</td><td colspan="4" style="color:var(--muted)">Ammo costs half the gun's price. Repair points cap at 100 a round.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="how">
+          <p class="eyebrow">How it was built</p>
+          <p>Before the full pipeline existed. A Claude session wrote the code with the gameplay-programmer, test-writer and code-reviewer agents, and the playtester and game-designer joined shortly before. The map isn't hand-placed: an editor menu, <span class="mono">Game › Build Greybox Map</span>, generates the whole scene, so changing the map means editing the builder and running it again.</p>
+          <div class="stats">
+            <div class="stat"><b>47</b><span>EditMode tests passing</span></div>
+            <div class="stat"><b>5</b><span>guns</span></div>
+            <div class="stat"><b>3</b><span>areas</span></div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: vision -->
+    <article class="entry" id="vision">
+      <div class="when"><span class="t">00:36</span><span>21 Nov 2026</span><span class="hash">745ad4f</span></div>
+      <div class="e-body">
+        <p class="kicker">Design</p>
+        <h3>The vision is written</h3>
+        <p>The fishing town, the fallen star, the Drowned, the Starbow and the Keeper all come from one document, <span class="mono">Docs/Design/Vision.md</span>. It sets the pillars, the economy's starting numbers and the five milestones, and every agent reads it before designing or building anything. One rule runs through it: every name, place, character and quest is original.</p>
+      </div>
+    </article>
+
+    <!-- ENTRY: foundations -->
+    <article class="entry" id="foundations">
+      <div class="when"><span class="t">00:20</span><span>21 Nov 2026</span><span class="hash">82aa07e · d482700 · 5a4b626</span></div>
+      <div class="e-body">
+        <p class="kicker">Foundations</p>
+        <h3>An empty project, a rifle and a test arena</h3>
+        <p>A fresh Unity 6 URP project with the first three agents (gameplay-programmer, test-writer, code-reviewer). Within ten minutes it had a first-person controller with walk, sprint, jump and gamepad support, a hitscan rifle with aim-down-sights, spread, reload, headshots and damage falloff, target dummies that flash when hit, and a generated test arena. The playtester and game-designer agents followed.</p>
+        <div class="stats">
+          <div class="stat"><b>25</b><span>first EditMode tests</span></div>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<footer class="foot">
+  <p>Kept alongside development. New entries are added as each slice lands, from the project's commit history, design docs and playtest screenshots.</p>
+  <p>Lanternfall is an original game. Its setting, names, characters and map are its own.</p>
+</footer>
+
+</div>
+</body>
+</html>
