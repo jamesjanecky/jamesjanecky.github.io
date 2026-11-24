@@ -212,14 +212,14 @@ details[open] summary { margin-bottom: 8px; }
     <polygon points="710,56 713,62 710,68 707,62" fill="var(--tower)" opacity=".5"/>
   </svg>
   <div class="mast-text">
-    <p class="eyebrow">Devlog · working title</p>
+    <p class="eyebrow">Devlog</p>
     <h1>Lantern<span>fall</span></h1>
     <p class="tag">A star fell into the bay of a storm-battered fishing town, and the townsfolk came back from the water wrong. A solo, round-based survival shooter, built one playable slice at a time by a team of AI agents in Unity 6.</p>
     <div class="facts">
       <span>Engine <b>Unity 6 · URP</b></span>
-      <span>Now <b>Milestone 4 · slice 4 of 6</b></span>
-      <span>Tests <b>518 passing</b></span>
-      <span>Last entry <b>23 Nov 2026</b></span>
+      <span>Now <b>Milestone 5 · starting</b></span>
+      <span>Tests <b>667 passing</b></span>
+      <span>Last entry <b>24 Nov 2026</b></span>
     </div>
   </div>
 </header>
@@ -267,27 +267,27 @@ details[open] summary { margin-bottom: 8px; }
       </div>
       <span class="pill done">Done</span>
     </div>
-    <div class="ms now">
+    <div class="ms done">
       <div class="ms-num">M4</div>
       <div class="ms-body">
         <h3>The Starbow</h3>
-        <p>The signature bow, the low-tide quest that unlocks it, and four upgrade paths, each with its own quest. Before it, a polish pass: a new sky, tighter shooting and four kinds of Drowned.</p>
-        <div class="tidebar" aria-label="3 of 6 slices done"><i style="width:50%"></i></div>
+        <p>The signature bow, the low-tide quest that unlocks it, and four upgrade paths, each with its own quest. Before it, a polish pass: a new sky, tighter shooting and four kinds of Drowned. After it, a full UI pass and one-click playtest builds.</p>
+        <div class="tidebar" aria-label="6 of 6 slices done"><i style="width:100%"></i></div>
         <ol class="slices">
           <li class="done"><span class="dot"></span><span>1 · The Starbow</span><span class="mono hash">56bc87c</span></li>
           <li class="done"><span class="dot"></span><span>2 · Low tide + unlock</span><span class="mono hash">11c0df9</span></li>
           <li class="done"><span class="dot"></span><span>3 · Path choice + Lanternflame</span><span class="mono hash">9b79221</span></li>
-          <li class="next"><span class="dot"></span><span>4 · Saltglass</span><span class="mono hash">building</span></li>
-          <li><span class="dot"></span><span>5 · Riptide</span><span class="mono hash"></span></li>
-          <li><span class="dot"></span><span>6 · Abyss</span><span class="mono hash"></span></li>
+          <li class="done"><span class="dot"></span><span>4 · Saltglass</span><span class="mono hash">6775c82</span></li>
+          <li class="done"><span class="dot"></span><span>5 · Riptide</span><span class="mono hash">51069c5</span></li>
+          <li class="done"><span class="dot"></span><span>6 · Abyss</span><span class="mono hash">96d38fc</span></li>
         </ol>
       </div>
-      <span class="pill now">In progress</span>
+      <span class="pill done">Done</span>
     </div>
-    <div class="ms">
+    <div class="ms now">
       <div class="ms-num">M5</div>
-      <div class="ms-body"><h3>Endgame</h3><p>The Bellringer, the main quest, the Keeper boss, then a polish and art pass.</p></div>
-      <span class="pill">Planned</span>
+      <div class="ms-body"><h3>Endgame</h3><p>The Bellringer, the main quest, the Keeper boss, then a polish and art pass. Co-op is planned for after it.</p></div>
+      <span class="pill now">In progress</span>
     </div>
   </div>
 </section>
@@ -349,16 +349,16 @@ details[open] summary { margin-bottom: 8px; }
 <!-- ======================= GIT STATS (as of fe96e1b) ======================= -->
 <section id="stats">
   <div class="sec-head">
-    <p class="eyebrow">From the git history · as of 9b79221</p>
+    <p class="eyebrow">From the git history · as of c0cf5d1</p>
     <h2>By the numbers</h2>
   </div>
   <div class="kpis">
-    <div class="kpi"><b>36</b><span>commits over 3 days</span></div>
-    <div class="kpi"><b>33,151</b><span>lines of game C# in 193 files</span></div>
-    <div class="kpi"><b>518</b><span>tests in 6,643 lines of test code</span></div>
-    <div class="kpi"><b>33,562</b><span>words of design docs in 13 files</span></div>
-    <div class="kpi"><b>72</b><span>sound effects, synthesized from code</span></div>
-    <div class="kpi"><b>3 of 5</b><span>milestones done</span></div>
+    <div class="kpi"><b>46</b><span>commits over 4 days</span></div>
+    <div class="kpi"><b>43,720</b><span>lines of game C# in 244 files</span></div>
+    <div class="kpi"><b>667</b><span>tests in 8,984 lines of test code</span></div>
+    <div class="kpi"><b>36,651</b><span>words of design docs in 14 files</span></div>
+    <div class="kpi"><b>111</b><span>sound effects, synthesized from code</span></div>
+    <div class="kpi"><b>4 of 5</b><span>milestones done</span></div>
   </div>
 
   <div class="figure">
@@ -405,55 +405,72 @@ details[open] summary { margin-bottom: 8px; }
       <div class="row"><span class="lab"><span class="mono">11c0df9</span>Low tide &amp; unlock</span><div class="track"><i class="c-code" style="width:41.7%" title="Game code: 2,003"></i><i class="c-test" style="width:4.4%" title="Tests: 211"></i><i class="c-docs" style="width:0.1%" title="Docs &amp; agents: 4"></i></div><span class="val">2,218</span></div>
       <div class="row"><span class="lab"><span class="mono">647e687</span>Chest beacon</span><div class="track"><i class="c-code" style="width:16.2%" title="Game code: 778"></i><i class="c-test" style="width:3.8%" title="Tests: 184"></i><i class="c-docs" style="width:0.1%" title="Docs &amp; agents: 3"></i></div><span class="val">965</span></div>
       <div class="row"><span class="lab"><span class="mono">9b79221</span>Paths &amp; Lanternflame</span><div class="track"><i class="c-code" style="width:79.4%" title="Game code: 3,812"></i><i class="c-test" style="width:11.3%" title="Tests: 543"></i><i class="c-docs" style="width:0.2%" title="Docs &amp; agents: 8"></i></div><span class="val">4,363</span></div>
+      <div class="row"><span class="lab"><span class="mono">6775c82</span>Saltglass</span><div class="track"><i class="c-code" style="width:35.5%" title="Game code: 1,704"></i><i class="c-test" style="width:9%" title="Tests: 432"></i><i class="c-docs" style="width:0.1%" title="Docs &amp; agents: 4"></i></div><span class="val">2,140</span></div>
+      <div class="row"><span class="lab"><span class="mono">51069c5</span>Riptide</span><div class="track"><i class="c-code" style="width:37.5%" title="Game code: 1,800"></i><i class="c-test" style="width:8.6%" title="Tests: 412"></i><i class="c-docs" style="width:0.2%" title="Docs &amp; agents: 8"></i></div><span class="val">2,220</span></div>
+      <div class="row"><span class="lab"><span class="mono">7bfb931</span>Hounds every 5th</span><div class="track"><i class="c-code" style="width:0.1%" title="Game code: 3"></i><i class="c-test" style="width:0.2%" title="Tests: 9"></i><i class="c-docs" style="width:0.1%" title="Docs &amp; agents: 4"></i></div><span class="val">16</span></div>
+      <div class="row"><span class="lab"><span class="mono">7419592</span>Co-op rule</span><div class="track"><i class="c-docs" style="width:0.1%" title="Docs &amp; agents: 6"></i></div><span class="val">6</span></div>
+      <div class="row"><span class="lab"><span class="mono">96d38fc</span>Abyss</span><div class="track"><i class="c-code" style="width:35.7%" title="Game code: 1,714"></i><i class="c-test" style="width:7.1%" title="Tests: 340"></i><i class="c-docs" style="width:0.3%" title="Docs &amp; agents: 15"></i></div><span class="val">2,069</span></div>
+      <div class="row"><span class="lab"><span class="mono">051c080</span>UI design</span><div class="track"><i class="c-docs" style="width:2.8%" title="Docs &amp; agents: 136"></i></div><span class="val">136</span></div>
+      <div class="row"><span class="lab"><span class="mono">46bb278</span>UI · menus</span><div class="track"><i class="c-code" style="width:58.2%" title="Game code: 2,796"></i><i class="c-test" style="width:9.7%" title="Tests: 466"></i><i class="c-docs" style="width:0.3%" title="Docs &amp; agents: 16"></i></div><span class="val">3,278</span></div>
+      <div class="row"><span class="lab"><span class="mono">5ea2f79</span>UI · HUD</span><div class="track"><i class="c-code" style="width:59.6%" title="Game code: 2,859"></i><i class="c-test" style="width:6.8%" title="Tests: 328"></i><i class="c-docs" style="width:0.1%" title="Docs &amp; agents: 4"></i></div><span class="val">3,191</span></div>
+      <div class="row"><span class="lab"><span class="mono">fed05e6</span>UI · cards</span><div class="track"><i class="c-code" style="width:40.9%" title="Game code: 1,962"></i><i class="c-test" style="width:7%" title="Tests: 334"></i><i class="c-docs" style="width:0.1%" title="Docs &amp; agents: 7"></i></div><span class="val">2,303</span></div>
+      <div class="row"><span class="lab"><span class="mono">c0cf5d1</span>Playtest build</span><div class="track"><i class="c-code" style="width:7.8%" title="Game code: 375"></i><i class="c-test" style="width:1.1%" title="Tests: 55"></i><i class="c-docs" style="width:0.1%" title="Docs &amp; agents: 3"></i></div><span class="val">433</span></div>
     </div>
     <div class="axis"><span></span><div><span>0</span><span>1,200</span><span>2,400</span><span>3,600</span><span>4,800</span></div><span></span></div>
-    <p class="note">Lines added, oldest commit first. Game code is C# only; the Python sound generator (675 lines) is left out. Unity's own files are left out: scenes, prefabs, materials and sounds add about 474,000 more lines, most of them the generated map scene, which is rewritten each time the map is rebuilt. The town blockout and every slice since rebuilt a much bigger scene.</p>
+    <p class="note">Lines added, oldest commit first. Game code is C# only; the Python sound generator (1,373 lines) and the UI layout and style files (1,357 lines of UXML and USS) are left out. Unity's own files are left out: scenes, prefabs, materials and sounds add about 474,000 more lines, most of them the generated map scene, which is rewritten each time the map is rebuilt. The town blockout and every slice since rebuilt a much bigger scene.</p>
   </div>
 
   <div class="two">
     <div class="figure">
       <h3>Game code by system</h3>
-      <div class="rows" role="img" aria-label="Lines of C# by system. The Starbow and its quests are the largest at 6,790 lines, then the map builder at 3,929.">
-        <div class="row"><span class="lab">Starbow &amp; quests</span><div class="track"><i class="c-test" style="width:100%" title="Starbow: 6,790"></i></div><span class="val">6,790</span></div>
-        <div class="row"><span class="lab">Map builder</span><div class="track"><i class="c-test" style="width:57.9%" title="Editor: 3,929"></i></div><span class="val">3,929</span></div>
-        <div class="row"><span class="lab">Game feel</span><div class="track"><i class="c-test" style="width:37.9%" title="Feel: 2,572"></i></div><span class="val">2,572</span></div>
-        <div class="row"><span class="lab">The Drowned</span><div class="track"><i class="c-test" style="width:37.5%" title="Enemies: 2,544"></i></div><span class="val">2,544</span></div>
-        <div class="row"><span class="lab">Star shards</span><div class="track"><i class="c-test" style="width:32.5%" title="Shards: 2,205"></i></div><span class="val">2,205</span></div>
-        <div class="row"><span class="lab">Lighthouse &amp; sky</span><div class="track"><i class="c-test" style="width:28.1%" title="World: 1,907"></i></div><span class="val">1,907</span></div>
-        <div class="row"><span class="lab">HUD</span><div class="track"><i class="c-test" style="width:26.6%" title="UI: 1,807"></i></div><span class="val">1,807</span></div>
-        <div class="row"><span class="lab">Rounds &amp; hounds</span><div class="track"><i class="c-test" style="width:26.4%" title="Waves: 1,795"></i></div><span class="val">1,795</span></div>
-        <div class="row"><span class="lab">Star Anvil</span><div class="track"><i class="c-test" style="width:25.7%" title="Anvil: 1,744"></i></div><span class="val">1,744</span></div>
-        <div class="row"><span class="lab">Driftwood Shield</span><div class="track"><i class="c-test" style="width:23.6%" title="Shield: 1,602"></i></div><span class="val">1,602</span></div>
-        <div class="row"><span class="lab">Weapons</span><div class="track"><i class="c-test" style="width:21%" title="Weapons: 1,429"></i></div><span class="val">1,429</span></div>
-        <div class="row"><span class="lab">Castaway Chest</span><div class="track"><i class="c-test" style="width:18.3%" title="Chest: 1,243"></i></div><span class="val">1,243</span></div>
-        <div class="row"><span class="lab">Player &amp; knife</span><div class="track"><i class="c-test" style="width:15.5%" title="Player: 1,053"></i></div><span class="val">1,053</span></div>
-        <div class="row"><span class="lab">Power-ups</span><div class="track"><i class="c-test" style="width:12%" title="PowerUps: 817"></i></div><span class="val">817</span></div>
-        <div class="row"><span class="lab">Perks</span><div class="track"><i class="c-test" style="width:9.8%" title="Perks: 664"></i></div><span class="val">664</span></div>
-        <div class="row"><span class="lab">Core</span><div class="track"><i class="c-test" style="width:8%" title="Core: 542"></i></div><span class="val">542</span></div>
-        <div class="row"><span class="lab">Doors &amp; buys</span><div class="track"><i class="c-test" style="width:5.2%" title="Interaction: 356"></i></div><span class="val">356</span></div>
-        <div class="row"><span class="lab">Points</span><div class="track"><i class="c-test" style="width:2.2%" title="Economy: 152"></i></div><span class="val">152</span></div>
+      <div class="rows" role="img" aria-label="Lines of C# by system. The Starbow and its quests are the largest at 10,751 lines, then the map builder at 5,372 and the HUD and menus at 5,119.">
+        <div class="row"><span class="lab">Starbow &amp; quests</span><div class="track"><i class="c-test" style="width:100%" title="Starbow: 10,751"></i></div><span class="val">10,751</span></div>
+        <div class="row"><span class="lab">Map builder</span><div class="track"><i class="c-test" style="width:50%" title="Editor: 5,372"></i></div><span class="val">5,372</span></div>
+        <div class="row"><span class="lab">HUD &amp; menus</span><div class="track"><i class="c-test" style="width:47.6%" title="UI: 5,119"></i></div><span class="val">5,119</span></div>
+        <div class="row"><span class="lab">Game feel</span><div class="track"><i class="c-test" style="width:26.8%" title="Feel: 2,881"></i></div><span class="val">2,881</span></div>
+        <div class="row"><span class="lab">The Drowned</span><div class="track"><i class="c-test" style="width:23.8%" title="Enemies: 2,560"></i></div><span class="val">2,560</span></div>
+        <div class="row"><span class="lab">Star shards</span><div class="track"><i class="c-test" style="width:20.9%" title="Shards: 2,242"></i></div><span class="val">2,242</span></div>
+        <div class="row"><span class="lab">Lighthouse &amp; sky</span><div class="track"><i class="c-test" style="width:18.3%" title="World: 1,965"></i></div><span class="val">1,965</span></div>
+        <div class="row"><span class="lab">Star Anvil</span><div class="track"><i class="c-test" style="width:17.2%" title="Anvil: 1,846"></i></div><span class="val">1,846</span></div>
+        <div class="row"><span class="lab">Rounds &amp; hounds</span><div class="track"><i class="c-test" style="width:17%" title="Waves: 1,831"></i></div><span class="val">1,831</span></div>
+        <div class="row"><span class="lab">Core &amp; settings</span><div class="track"><i class="c-test" style="width:16.3%" title="Core: 1,755"></i></div><span class="val">1,755</span></div>
+        <div class="row"><span class="lab">Driftwood Shield</span><div class="track"><i class="c-test" style="width:14.9%" title="Shield: 1,602"></i></div><span class="val">1,602</span></div>
+        <div class="row"><span class="lab">Weapons</span><div class="track"><i class="c-test" style="width:13.5%" title="Weapons: 1,452"></i></div><span class="val">1,452</span></div>
+        <div class="row"><span class="lab">Castaway Chest</span><div class="track"><i class="c-test" style="width:11.6%" title="Chest: 1,243"></i></div><span class="val">1,243</span></div>
+        <div class="row"><span class="lab">Player &amp; knife</span><div class="track"><i class="c-test" style="width:10.1%" title="Player: 1,082"></i></div><span class="val">1,082</span></div>
+        <div class="row"><span class="lab">Power-ups</span><div class="track"><i class="c-test" style="width:7.6%" title="PowerUps: 817"></i></div><span class="val">817</span></div>
+        <div class="row"><span class="lab">Perks</span><div class="track"><i class="c-test" style="width:6.2%" title="Perks: 664"></i></div><span class="val">664</span></div>
+        <div class="row"><span class="lab">Doors &amp; buys</span><div class="track"><i class="c-test" style="width:3.3%" title="Interaction: 356"></i></div><span class="val">356</span></div>
+        <div class="row"><span class="lab">Points</span><div class="track"><i class="c-test" style="width:1.7%" title="Economy: 182"></i></div><span class="val">182</span></div>
       </div>
     </div>
     <div class="figure">
       <h3>Tests passing</h3>
-      <div class="rows" role="img" aria-label="Tests passing grew from 25 to 245 by the end of Milestone 2, 365 at the end of Milestone 3, 437 after the polish pass and 518 three slices into Milestone 4.">
-        <div class="row"><span class="lab">Controller</span><div class="track"><i class="c-code" style="width:4.8%" title="25 tests"></i></div><span class="val">25</span></div>
-        <div class="row"><span class="lab">Milestone 1</span><div class="track"><i class="c-code" style="width:9.1%" title="47 tests"></i></div><span class="val">47</span></div>
-        <div class="row"><span class="lab">Power-ups</span><div class="track"><i class="c-code" style="width:19.3%" title="100 tests"></i></div><span class="val">100</span></div>
-        <div class="row"><span class="lab">Perks</span><div class="track"><i class="c-code" style="width:29.9%" title="155 tests"></i></div><span class="val">155</span></div>
-        <div class="row"><span class="lab">Chest</span><div class="track"><i class="c-code" style="width:33.6%" title="174 tests"></i></div><span class="val">174</span></div>
-        <div class="row"><span class="lab">Star Anvil</span><div class="track"><i class="c-code" style="width:37.3%" title="193 tests"></i></div><span class="val">193</span></div>
-        <div class="row"><span class="lab">Star shards</span><div class="track"><i class="c-code" style="width:42.7%" title="221 tests"></i></div><span class="val">221</span></div>
-        <div class="row"><span class="lab">Game feel</span><div class="track"><i class="c-code" style="width:47.3%" title="245 tests"></i></div><span class="val">245</span></div>
-        <div class="row"><span class="lab">M3 · hounds</span><div class="track"><i class="c-code" style="width:65.3%" title="338 tests"></i></div><span class="val">338</span></div>
-        <div class="row"><span class="lab">M3 · shield</span><div class="track"><i class="c-code" style="width:70.5%" title="365 tests"></i></div><span class="val">365</span></div>
-        <div class="row"><span class="lab">Polish</span><div class="track"><i class="c-code" style="width:84.4%" title="437 tests"></i></div><span class="val">437</span></div>
-        <div class="row"><span class="lab">M4 · Starbow</span><div class="track"><i class="c-code" style="width:89%" title="461 tests"></i></div><span class="val">461</span></div>
-        <div class="row"><span class="lab">M4 · unlock</span><div class="track"><i class="c-code" style="width:91.7%" title="475 tests"></i></div><span class="val">475</span></div>
-        <div class="row"><span class="lab">Chest beacon</span><div class="track"><i class="c-code" style="width:94.6%" title="490 tests"></i></div><span class="val">490</span></div>
-        <div class="row"><span class="lab">M4 · Lanternflame</span><div class="track"><i class="c-code" style="width:100%" title="518 tests"></i></div><span class="val">518</span></div>
+      <div class="rows" role="img" aria-label="Tests passing grew from 25 to 245 by the end of Milestone 2, 365 at the end of Milestone 3, 570 at the end of Milestone 4 and 667 after the UI pass and playtest build.">
+        <div class="row"><span class="lab">Controller</span><div class="track"><i class="c-code" style="width:3.7%" title="25 tests"></i></div><span class="val">25</span></div>
+        <div class="row"><span class="lab">Milestone 1</span><div class="track"><i class="c-code" style="width:7%" title="47 tests"></i></div><span class="val">47</span></div>
+        <div class="row"><span class="lab">Power-ups</span><div class="track"><i class="c-code" style="width:15%" title="100 tests"></i></div><span class="val">100</span></div>
+        <div class="row"><span class="lab">Perks</span><div class="track"><i class="c-code" style="width:23.2%" title="155 tests"></i></div><span class="val">155</span></div>
+        <div class="row"><span class="lab">Chest</span><div class="track"><i class="c-code" style="width:26.1%" title="174 tests"></i></div><span class="val">174</span></div>
+        <div class="row"><span class="lab">Star Anvil</span><div class="track"><i class="c-code" style="width:28.9%" title="193 tests"></i></div><span class="val">193</span></div>
+        <div class="row"><span class="lab">Star shards</span><div class="track"><i class="c-code" style="width:33.1%" title="221 tests"></i></div><span class="val">221</span></div>
+        <div class="row"><span class="lab">Game feel</span><div class="track"><i class="c-code" style="width:36.7%" title="245 tests"></i></div><span class="val">245</span></div>
+        <div class="row"><span class="lab">M3 · hounds</span><div class="track"><i class="c-code" style="width:50.7%" title="338 tests"></i></div><span class="val">338</span></div>
+        <div class="row"><span class="lab">M3 · shield</span><div class="track"><i class="c-code" style="width:54.7%" title="365 tests"></i></div><span class="val">365</span></div>
+        <div class="row"><span class="lab">Polish</span><div class="track"><i class="c-code" style="width:65.5%" title="437 tests"></i></div><span class="val">437</span></div>
+        <div class="row"><span class="lab">M4 · Starbow</span><div class="track"><i class="c-code" style="width:69.1%" title="461 tests"></i></div><span class="val">461</span></div>
+        <div class="row"><span class="lab">M4 · unlock</span><div class="track"><i class="c-code" style="width:71.2%" title="475 tests"></i></div><span class="val">475</span></div>
+        <div class="row"><span class="lab">Chest beacon</span><div class="track"><i class="c-code" style="width:73.5%" title="490 tests"></i></div><span class="val">490</span></div>
+        <div class="row"><span class="lab">M4 · Lanternflame</span><div class="track"><i class="c-code" style="width:77.7%" title="518 tests"></i></div><span class="val">518</span></div>
+        <div class="row"><span class="lab">M4 · Saltglass</span><div class="track"><i class="c-code" style="width:80.5%" title="537 tests"></i></div><span class="val">537</span></div>
+        <div class="row"><span class="lab">M4 · Riptide</span><div class="track"><i class="c-code" style="width:83.4%" title="556 tests"></i></div><span class="val">556</span></div>
+        <div class="row"><span class="lab">M4 · Abyss</span><div class="track"><i class="c-code" style="width:85.5%" title="570 tests"></i></div><span class="val">570</span></div>
+        <div class="row"><span class="lab">UI · menus</span><div class="track"><i class="c-code" style="width:90.7%" title="605 tests"></i></div><span class="val">605</span></div>
+        <div class="row"><span class="lab">UI · HUD</span><div class="track"><i class="c-code" style="width:94.9%" title="633 tests"></i></div><span class="val">633</span></div>
+        <div class="row"><span class="lab">UI · cards</span><div class="track"><i class="c-code" style="width:98.1%" title="654 tests"></i></div><span class="val">654</span></div>
+        <div class="row"><span class="lab">Playtest build</span><div class="track"><i class="c-code" style="width:100%" title="667 tests"></i></div><span class="val">667</span></div>
       </div>
-      <p class="note">EditMode tests for the plain-C# rules: damage, ammo, points, round scaling, drop odds, perks, chest rolls, upgrades, elements, XP, level-up rolls, shake, springs, flinch, hit-stop, spawning, the lighthouse warm-up, hound schedules, the knife, the shield, the sky, fire timing, the Drowned variants, the bow, the tides, the chest flare and the quest steps. The Stop hook runs all of them before a session can finish.</p>
+      <p class="note">EditMode tests for the plain-C# rules: damage, ammo, points, round scaling, drop odds, perks, chest rolls, upgrades, elements, XP, level-up rolls, shake, springs, flinch, hit-stop, spawning, the lighthouse warm-up, hound schedules, the knife, the shield, the sky, fire timing, the Drowned variants, the bow, the tides, the chest flare, the quest steps, the paths, settings, the HUD model, notifications and the build script. The Stop hook runs all of them before a session can finish.</p>
     </div>
   </div>
 </section>
@@ -466,8 +483,206 @@ details[open] summary { margin-bottom: 8px; }
   </div>
   <div class="log">
 
-    <!-- GROUP: Milestone 4 -->
+    <!-- GROUP: polish before M5 -->
+    <div class="log-divider">Polish before Milestone 5 · the UI pass and playtest builds</div>
+
+    <!-- ENTRY: playtest build -->
+    <article class="entry" id="playtest-build">
+      <div class="when"><span class="t">11:42</span><span>24 Nov 2026</span><span class="hash">c0cf5d1</span></div>
+      <div class="e-body">
+        <p class="kicker">Tooling · friend playtests</p>
+        <h3>One click to a Windows build</h3>
+        <p>Friends can play it now. A new menu item, <span class="mono">Game › Build Playtest (Windows)</span>, builds a Windows version from the Mac and zips it with a <span class="mono">HOW_TO_PLAY.txt</span>. The controls in that file come from the real key bindings. It also says how to get past the Windows SmartScreen warning and where to find the log if something breaks. The build fails loudly instead of shipping something broken: in Play mode, with compile errors or without Windows support installed.</p>
+        <ul>
+          <li><b>It has a name.</b> The game is now officially <b>Lanternfall</b>, no longer a working title.</li>
+        </ul>
+        <div class="stats">
+          <div class="stat"><b>+13</b><span>new EditMode tests</span></div>
+          <div class="stat"><b>667</b><span>tests passing</span></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: UI slice 3 -->
+    <article class="entry" id="ui-slice-3">
+      <div class="when"><span class="t">11:24</span><span>24 Nov 2026</span><span class="hash">fed05e6</span></div>
+      <div class="e-body">
+        <p class="kicker">UI pass · slice 3 of 3 · UI pass complete</p>
+        <h3>Cards, a score screen and the last of the placeholders</h3>
+        <p>The level-up cards and the Starbow path cards were rebuilt in the new style. Rarity shows as a colour, pips and a name, and you can pick with keys, mouse or gamepad. Dying now ends on a proper score screen. It shows the round you reached, kills, headshots, knife kills, points, time survived, your Starbow path and your best round, with numbers that count up. Retry and Main menu wait a second, so a panicked click doesn't skip it.</p>
+        <ul>
+          <li><b>Damage numbers</b> moved to pooled labels, about 0.06 ms a frame with 22 Drowned on screen. A setting turns them off, or shows crits only.</li>
+          <li><b>Notifications</b> go through one priority queue that merges repeats into ×2, ×3.</li>
+          <li>Five new generated UI sounds and a reduce-motion option. No placeholder UI is left anywhere in the game.</li>
+        </ul>
+        <div class="shots">
+          <figure><img src="shots/ui3_levelup.jpg" alt="A level-up screen titled Star Rising with three cards: Sea Legs (common), Wick and Tallow (rare, highlighted in blue) and Brine-Soaked Rounds (common), each with stack pips" width="1280" height="720" loading="lazy"><figcaption>Level-up cards, with rarity by colour and stack pips.</figcaption></figure>
+          <figure><img src="shots/ui3_gameover.jpg" alt="A game-over screen in red slab letters reading You Were Drawn Under, Round 1 with a New Best tag, and a table of kills, headshots, knife kills, points, time survived, Starbow path Riptide and best round, over Retry and Main menu buttons" width="1280" height="720" loading="lazy"><figcaption>The new score screen.</figcaption></figure>
+        </div>
+        <div class="stats">
+          <div class="stat"><b>+22</b><span>new EditMode tests</span></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: UI slice 2 -->
+    <article class="entry" id="ui-slice-2">
+      <div class="when"><span class="t">10:53</span><span>24 Nov 2026</span><span class="hash">5ea2f79</span></div>
+      <div class="e-body">
+        <p class="kicker">UI pass · slice 2 of 3</p>
+        <h3>A new HUD</h3>
+        <p>The whole in-game HUD was rebuilt in the new style. Everything sits in the corners and the centre stays clear for aiming. Round, objective, shield, perks, power-ups, health, XP, the Starbow quiver, ammo, points, the quest tracker and the tide and hound-round indicators each have a place. Situational parts only show up when they matter.</p>
+        <ul>
+          <li><b>Readability fix:</b> bone-white text with dark outlines and backing plates, checked at 720p through 1440p. A soft drop shadow that bled at small sizes was dropped.</li>
+          <li>Health shows a ghost fill while it regenerates, and the screen edges go red when you're low.</li>
+          <li>The HUD only updates when a value changes, so it costs almost nothing per frame.</li>
+        </ul>
+        <div class="shots">
+          <figure class="wide"><img src="shots/ui2_hud.jpg" alt="A busy moment on the new HUD: round 1 top-left with the objective and a lamp warm-up bar, shield parts and perk chips below, Double Points and Kill Frenzy timers top-right, a banner The Lamp Is Lit, low-health red edges, damage arcs and ammo and points bottom-right" width="1280" height="720" loading="lazy"><figcaption>A busy moment: the lamp coming on, two power-ups running, hits from two sides and low health.</figcaption></figure>
+        </div>
+        <div class="stats">
+          <div class="stat"><b>+28</b><span>new EditMode tests</span></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: UI slice 1 -->
+    <article class="entry" id="ui-slice-1">
+      <div class="when"><span class="t">10:18</span><span>24 Nov 2026</span><span class="hash">46bb278</span></div>
+      <div class="e-body">
+        <p class="kicker">UI pass · slice 1 of 3</p>
+        <h3>Main menu, pause and settings</h3>
+        <p>Before friends play it, the game needed real menus. The design (051c080) set a look the user approved, <b>"lantern in a storm"</b>: dark, cold sea colours at the edges and warm lantern amber where you need to look. Headings use Alfa Slab One and body text uses Rubik. Both fonts are free to ship under the SIL Open Font License, and the licences are included.</p>
+        <ul>
+          <li><b>Main menu:</b> press Play and the menu opens over the live town, with the camera slowly circling it.</li>
+          <li><b>Pause:</b> Esc or the gamepad's Start button. Resume, Settings, Restart or Quit to menu, with a confirm before you lose a run. The game also pauses when the window loses focus.</li>
+          <li><b>Settings</b> in four tabs, applied live and saved: mouse and aim-down-sights sensitivity, invert Y, field of view, volume, a graphics preset, display mode, resolution and frame cap.</li>
+          <li>The menus moved from Unity's old immediate-mode UI to UI Toolkit, which scales cleanly to any screen.</li>
+        </ul>
+        <div class="shots">
+          <figure><img src="shots/ui1_menu.jpg" alt="The main menu: the title in amber slab letters, the tagline The star fell. The tide followed, and Play, Settings and Quit buttons in a dark panel with brass corners, over a high view of the town" width="1280" height="720" loading="lazy"><figcaption>The main menu over the live town.</figcaption></figure>
+          <figure><img src="shots/ui1_settings.jpg" alt="A settings panel with Gameplay, Video, Audio and Controls tabs; the Video tab shows graphics preset Medium, display mode Fullscreen window, resolution Native and frame rate 60 fps" width="1280" height="720" loading="lazy"><figcaption>Settings, Video tab.</figcaption></figure>
+        </div>
+        <div class="stats">
+          <div class="stat"><b>+35</b><span>new EditMode tests</span></div>
+          <div class="stat"><b>4</b><span>settings tabs</span></div>
+        </div>
+      </div>
+    </article>
+
     <div class="log-divider">Milestone 4 · the Starbow</div>
+
+    <!-- ENTRY: M4 slice 6 -->
+    <article class="entry" id="m4-slice-6">
+      <div class="when"><span class="t">09:35</span><span>24 Nov 2026</span><span class="hash">96d38fc</span></div>
+      <div class="e-body">
+        <p class="kicker">Milestone 4 · slice 6 of 6 · milestone complete</p>
+        <h3>Abyss, the hardest path</h3>
+        <p>The last path runs through the Sunken Tunnels, under the town. With it, all four Starbow paths can be chosen, and Milestone 4 is done.</p>
+        <div class="numbers">
+          <table>
+            <thead><tr><th>Abyss step</th><th>What you do</th></tr></thead>
+            <tbody>
+              <tr><td>1 · Pearls</td><td>Take 3 void pearls from rubble piles in the tunnels</td></tr>
+              <tr><td>2 · The deepstone</td><td>Carry the heavy deepstone past a spawn window to the cistern: 80% speed, no sprinting, and 2 hits send it back to the altar</td></tr>
+              <tr><td>3 · Hold the well</td><td>Set it in the gate-hall well and hold for 45 s while the Drowned try to choke it</td></tr>
+              <tr><td>Reward</td><td>Full-charge arrows open a 3 s gravity well that pulls the Drowned and hounds in and crushes those at its core, for about 98% of an arrow's damage</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li>The well never pulls anything through a wall, off the walkable floor or between floors.</li>
+        </ul>
+        <div class="shots">
+          <figure><img src="shots/m4s6_carry.jpg" alt="A narrow tunnel with a quest tracker reading Abyss 2/3, Carry the deepstone east to the cistern - heavy, no sprinting, 2 hits drop it, and a marker 17 m ahead" width="1280" height="720" loading="lazy"><figcaption>Step two: carrying the deepstone down the tunnel.</figcaption></figure>
+          <figure><img src="shots/m4s6_well.jpg" alt="A violet spiral gravity well on a tunnel floor with Drowned bunched up at its centre and purple fragments being pulled in" width="1280" height="720" loading="lazy"><figcaption>The reward: a well pulling a pack together in the tunnel.</figcaption></figure>
+        </div>
+        <div class="stats">
+          <div class="stat"><b>+14</b><span>new EditMode tests</span></div>
+          <div class="stat"><b>4 of 4</b><span>paths playable</span></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: co-op guideline -->
+    <article class="entry" id="coop-ready">
+      <div class="when"><span class="t">09:11</span><span>24 Nov 2026</span><span class="hash">7419592</span></div>
+      <div class="e-body">
+        <p class="kicker">Process</p>
+        <h3>Building for co-op later</h3>
+        <p>Co-op is planned for after Milestone 5. To keep that door open, the agents got a new coding rule. New code must not assume there's only one player: look players up in one place, keep points, perks and quest progress on the player, avoid freezing the whole game where a per-player overlay would do, and let enemies pick a target instead of "the player". Older solo shortcuts can stay until the co-op milestone.</p>
+      </div>
+    </article>
+
+    <!-- ENTRY: hound rhythm -->
+    <article class="entry" id="hound-rhythm">
+      <div class="when"><span class="t">01:43</span><span>24 Nov 2026</span><span class="hash">7bfb931</span></div>
+      <div class="e-body">
+        <p class="kicker">Tuning · after a playtest</p>
+        <h3>Brine Hounds every fifth round</h3>
+        <p>After a playtest the user asked for a steadier rhythm. Brine Tides used to start on round 6 or 7 and then come every 5 to 7 rounds. Now they come every 5th round (5, 10, 15…), and every one ends with a Full Refill, so you can plan around them.</p>
+      </div>
+    </article>
+
+    <!-- ENTRY: M4 slice 5 -->
+    <article class="entry" id="m4-slice-5">
+      <div class="when"><span class="t">01:30</span><span>24 Nov 2026</span><span class="hash">51069c5</span></div>
+      <div class="e-body">
+        <p class="kicker">Milestone 4 · slice 5 of 6</p>
+        <h3>Riptide</h3>
+        <p>The sea path, along the Sea Wall and Tide Pools.</p>
+        <div class="numbers">
+          <table>
+            <thead><tr><th>Riptide step</th><th>What you do</th></tr></thead>
+            <tbody>
+              <tr><td>1 · Conches</td><td>Gather 3 tide conches. They only wash up at low tide, and at high tide the HUD tells you when the next low tide comes</td></tr>
+              <tr><td>2 · Stir the pool</td><td>Kill Drowned at the tide pool</td></tr>
+              <tr><td>3 · Wind the sea-gate</td><td>Start the winch and stay within 6 m for 30 s while the Drowned try to jam it</td></tr>
+              <tr><td>Reward</td><td>Full-charge arrows release a 7 m wave that knocks the Drowned back and leaves them <b>Drenched</b>: 40% slower and taking 20% more damage</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li>The wave can't push anyone through a wall or off the walkable floor. Drenched and the Anvil's Chill don't stack: the stronger one wins.</li>
+        </ul>
+        <div class="shots">
+          <figure><img src="shots/m4s5_winch.jpg" alt="The sea-gate winch in front of a wooden gate, an amber hold ring on the floor and a tracker reading Riptide 3/3, Wind the sea-gate 18/30 s, with Low tide on the HUD" width="1280" height="720" loading="lazy"><figcaption>Step three: holding the winch, 18 of 30 seconds.</figcaption></figure>
+          <figure><img src="shots/m4s5_wave.jpg" alt="A ring of pale water bursting around a Drowned in the middle of a pack, a 529 damage number above it" width="1280" height="720" loading="lazy"><figcaption>The wave hitting a pack.</figcaption></figure>
+        </div>
+        <div class="stats">
+          <div class="stat"><b>+19</b><span>new EditMode tests</span></div>
+        </div>
+      </div>
+    </article>
+
+    <!-- ENTRY: M4 slice 4 -->
+    <article class="entry" id="m4-slice-4">
+      <div class="when"><span class="t">00:59</span><span>24 Nov 2026</span><span class="hash">6775c82</span></div>
+      <div class="e-body">
+        <p class="kicker">Milestone 4 · slice 4 of 6</p>
+        <h3>Saltglass</h3>
+        <p>The second path, across the Salt Flats and the Cannery. The quest framework gained two new kinds of step for it: fetching items and holding a spot.</p>
+        <div class="numbers">
+          <table>
+            <thead><tr><th>Saltglass step</th><th>What you do</th></tr></thead>
+            <tbody>
+              <tr><td>1 · Salt lumps</td><td>Walk over 3 of the 5 salt lumps on the Salt Flats</td></tr>
+              <tr><td>2 · Fire the furnace</td><td>Light the Cannery furnace and keep it burning for 40 s while nearby Drowned drain it. If it goes out you relight it, free</td></tr>
+              <tr><td>3 · Ring the chimes</td><td>Ring 4 of the 6 hidden brine chimes with full-charge arrows within 75 s</td></tr>
+              <tr><td>Reward</td><td>Full-charge arrows burst into a cone of 9 piercing crystal shards where they stop, each doing 18% of an arrow's damage</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="shots">
+          <figure><img src="shots/m4s4_furnace.jpg" alt="The Cannery furnace glowing orange with a hold ring and progress bar, and a tracker reading Saltglass 2/3, Fire the furnace 7/40 s" width="1280" height="720" loading="lazy"><figcaption>Step two: keeping the furnace burning.</figcaption></figure>
+          <figure><img src="shots/m4s4_cone.jpg" alt="A crowd of Drowned under a street lamp with a cluster of overlapping damage numbers from the crystal shards" width="1280" height="720" loading="lazy"><figcaption>The shard cone tearing through a crowd.</figcaption></figure>
+        </div>
+        <div class="stats">
+          <div class="stat"><b>+19</b><span>new EditMode tests</span></div>
+        </div>
+      </div>
+    </article>
+
 
     <!-- ENTRY: M4 slice 3 -->
     <article class="entry" id="m4-slice-3">
@@ -767,7 +982,7 @@ details[open] summary { margin-bottom: 8px; }
           <table>
             <thead><tr><th>Brine Hound</th><th></th></tr></thead>
             <tbody>
-              <tr><td>First tide</td><td class="n">round 6 or 7, then every 5–7 rounds</td></tr>
+              <tr><td>First tide</td><td class="n">round 6 or 7, then every 5–7 rounds (later changed to every 5th round)</td></tr>
               <tr><td>Speed</td><td class="n">6.5 m/s (a sprinting Drowned does 5)</td></tr>
               <tr><td>Health</td><td class="n">about 0.35× a Drowned's</td></tr>
               <tr><td>Bite</td><td class="n">a lunge for 20</td></tr>
