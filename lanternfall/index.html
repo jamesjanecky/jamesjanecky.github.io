@@ -68,6 +68,12 @@ section { display: grid; gap: 22px; padding-top: 64px; }
 .mast .tag { font-size: 1.2rem; max-width: 56ch; }
 .facts { display: flex; flex-wrap: wrap; gap: 8px 18px; font-family: var(--font-mono); font-size: .8rem; color: var(--muted); }
 .facts b { color: var(--ink); font-weight: 500; }
+.guide-card { display: grid; grid-template-columns: 1fr auto; gap: 2px 14px; align-items: center; padding: 14px 16px; border: 1px solid var(--rule); border-left: 4px solid var(--lamp); border-radius: 6px; background: var(--surface); color: var(--ink); text-decoration: none; max-width: 60ch; }
+.guide-card b { font-family: var(--font-display); font-size: 1.45rem; font-weight: 800; line-height: 1.1; }
+.guide-card .d { grid-column: 1; color: var(--muted); font-size: .92rem; }
+.guide-card .arr { grid-column: 2; grid-row: 1 / span 3; font-size: 1.6rem; color: var(--lamp); }
+.guide-card:hover { border-color: var(--star); border-left-color: var(--lamp); }
+.guide-card:hover b { color: var(--star); }
 
 /* milestone chart */
 .chart { display: grid; gap: 0; }
@@ -221,6 +227,7 @@ details[open] summary { margin-bottom: 8px; }
       <span>Tests <b>1,455 passing</b></span>
       <span>Last entry <b>26 Nov 2026</b></span>
     </div>
+    <a class="guide-card" href="systems-guide/index.html"><span class="eyebrow">New · under the hood</span><b>The technical systems guide</b><span class="d">How the code works, for engineers new to game dev: the frame loop, the damage pipeline, enemy AI, rendering and the map built by code.</span><span class="arr" aria-hidden="true">→</span></a>
   </div>
 </header>
 
@@ -2259,6 +2266,7 @@ details[open] summary { margin-bottom: 8px; }
 
 <footer class="foot">
   <p>Kept alongside development. New entries are added as each slice lands, from the project's commit history, design docs and playtest screenshots.</p>
+  <p>Want the engineering side? Read the <a href="systems-guide/index.html">technical systems guide</a>.</p>
   <p>Lanternfall is an original game. Its setting, names, characters and map are its own.</p>
 </footer>
 

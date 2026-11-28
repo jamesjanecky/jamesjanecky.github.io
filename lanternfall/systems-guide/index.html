@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="How Lanternfall works under the hood: a tour of the game's systems for software engineers new to game development.">
+<title>Lanternfall Systems Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Same harbour-logbook look as the devlog: sea-fog paper, harbour ink, lamp amber, star-glass teal.
+   Layout: masthead, then a sticky contents rail beside one reading column (stacks on phones). */
+:root {
+  --bg: #e9eeec;          /* sea-fog paper */
+  --surface: #f6f8f7;
+  --ink: #17242e;         /* harbour ink */
+  --muted: #55646d;
+  --rule: #c9d3d1;
+  --lamp: #b9740f;        /* lighthouse lamp (text-safe on light) */
+  --lamp-fill: #e9a537;
+  --star: #1f8f98;        /* fallen star-glass */
+  --star-soft: #cfe8e8;
+  --done: #2f7d4f;
+  --sea1: #2d4a5c; --sea2: #20384a; --sky: #3a5468; --land: #6f5a48; --tower: #e8e2d6; --tower-shade: #c8bfb0; --band: #b8443a;
+  --s-code: #d8952a; --s-test: #1f8f98; --s-docs: #7466b4;   /* chart series */
+  --font-display: "Big Shoulders Display", "Arial Narrow", Impact, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d171e; --surface: #13212a; --ink: #dbe4e6; --muted: #92a3ab; --rule: #26383f;
+  --lamp: #f2b544; --lamp-fill: #f2b544; --star: #6fd6da; --star-soft: #173a40; --done: #6cc792;
+  --sea1: #1b3242; --sea2: #122634; --sky: #1a2c38; --land: #4c3e33; --tower: #d6cfc2; --tower-shade: #a39a8c; --band: #a83c33;
+  --s-code: #f2b544; --s-test: #4fc3c9; --s-docs: #a497e4;
+  color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --bg: #0d171e; --surface: #13212a; --ink: #dbe4e6; --muted: #92a3ab; --rule: #26383f;
+  --lamp: #f2b544; --lamp-fill: #f2b544; --star: #6fd6da; --star-soft: #173a40; --done: #6cc792;
+  --sea1: #1b3242; --sea2: #122634; --sky: #1a2c38; --land: #4c3e33; --tower: #d6cfc2; --tower-shade: #a39a8c; --band: #a83c33;
+  --s-code: #f2b544; --s-test: #4fc3c9; --s-docs: #a497e4;
+  color-scheme: dark; }
+
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 16px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.6; }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-bottom: 72px; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.05; text-wrap: balance; margin: 0; letter-spacing: .01em; }
+p { margin: 0; }
+a { color: var(--star); }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; }
+.eyebrow { font-family: var(--font-mono); font-size: .74rem; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+code { font-family: var(--font-mono); font-size: .82em; background: var(--star-soft); color: var(--ink); padding: .08em .35em; border-radius: 3px; overflow-wrap: anywhere; }
+
+/* masthead */
+.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding-top: 20px; font-family: var(--font-mono); font-size: .8rem; }
+.top a { text-decoration: none; color: var(--muted); }
+.top a:hover { color: var(--star); }
+.top .brand b { color: var(--ink); font-weight: 500; }
+.mast { display: grid; gap: 14px; padding: 36px 0 34px; border-bottom: 3px solid var(--ink); }
+.mast h1 { font-size: clamp(3rem, 10vw, 5.6rem); font-weight: 800; text-transform: uppercase; letter-spacing: .02em; }
+.mast h1 span { color: var(--lamp); }
+.mast .intro { display: grid; gap: 10px; max-width: 64ch; font-size: 1.12rem; }
+.mast .intro p + p { font-size: .95rem; color: var(--muted); }
+.mast .facts { display: flex; flex-wrap: wrap; gap: 8px 18px; font-family: var(--font-mono); font-size: .8rem; color: var(--muted); }
+.mast .facts b { color: var(--ink); font-weight: 500; }
+
+/* layout */
+.layout { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 48px; align-items: start; padding-top: 8px; }
+.toc { position: sticky; top: 0; max-height: 100vh; overflow-y: auto; padding: 28px 0 24px; }
+.toc details > summary { list-style: none; cursor: default; }
+.toc details > summary::-webkit-details-marker { display: none; }
+.toc ol { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 1px; border-left: 2px solid var(--rule); }
+.toc a { display: grid; grid-template-columns: 26px 1fr; padding: 4px 8px 4px 12px; margin-left: -2px; border-left: 2px solid transparent; color: var(--muted); text-decoration: none; font-size: .88rem; line-height: 1.35; }
+.toc a .num { font-family: var(--font-mono); font-size: .74rem; padding-top: 2px; }
+.toc a:hover { color: var(--ink); }
+.toc a.on { color: var(--ink); border-left-color: var(--lamp); font-weight: 700; }
+.toc a.on .num { color: var(--lamp); }
+
+/* reading column */
+main { min-width: 0; max-width: 72ch; }
+.g-sec { display: grid; gap: 16px; padding-top: 44px; }
+.g-sec h2 { font-size: 2.1rem; font-weight: 800; text-transform: uppercase; display: flex; align-items: baseline; gap: 12px; border-top: 3px solid var(--ink); padding-top: 14px; }
+.g-sec h2 .num { font-family: var(--font-mono); font-size: .95rem; font-weight: 500; color: var(--lamp); letter-spacing: 0; }
+.g-sec h3 { font-size: 1.45rem; font-weight: 800; padding-top: 10px; }
+.g-sec ul, .g-sec ol { margin: 0; padding-left: 1.25em; display: grid; gap: 8px; }
+.g-sec li > ul, .g-sec li > ol { margin-top: 6px; gap: 4px; }
+.g-sec li > p { margin-top: 8px; }
+.g-sec ol > li::marker { font-family: var(--font-mono); font-size: .85em; color: var(--lamp); }
+.g-sec b { font-weight: 700; }
+.tbl { overflow-x: auto; border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); }
+.tbl table { border-collapse: collapse; width: 100%; font-size: .9rem; line-height: 1.5; }
+.tbl th, .tbl td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.tbl tr:last-child td { border-bottom: 0; }
+.tbl th { font-family: var(--font-mono); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 500; background: var(--bg); }
+.tbl td:first-child { font-weight: 700; min-width: 9em; }
+.tbl td code { background: transparent; padding: 0; color: var(--star); }
+.tbl td:first-child code { color: var(--ink); }
+pre.code { margin: 0; overflow-x: auto; background: var(--sea2); color: #e8e2d6; border-radius: 6px; padding: 16px 18px; font-family: var(--font-mono); font-size: .82rem; line-height: 1.7; }
+pre.code code { background: none; color: inherit; padding: 0; font-size: inherit; overflow-wrap: normal; }
+#glossary .tbl td:first-child { white-space: nowrap; }
+.foot { padding-top: 56px; font-size: .85rem; color: var(--muted); display: grid; gap: 6px; }
+
+@media (max-width: 880px) {
+  .layout { grid-template-columns: 1fr; gap: 0; }
+  .toc { position: static; max-height: none; padding: 20px 0 0; }
+  .toc details { border: 1px solid var(--rule); border-radius: 6px; background: var(--surface); padding: 10px 14px; }
+  .toc details > summary { cursor: pointer; display: flex; justify-content: space-between; }
+  .toc details > summary::after { content: "+"; font-family: var(--font-mono); color: var(--lamp); }
+  .toc details[open] > summary::after { content: "–"; }
+  main { max-width: none; }
+  .g-sec h2 { font-size: 1.8rem; }
+  #glossary .tbl td:first-child { white-space: normal; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="top" aria-label="Site">
+  <a class="brand" href="../index.html"><b>Lanternfall</b> · Devlog</a>
+  <a href="../index.html">← Back to the devlog</a>
+</nav>
+
+<header class="mast">
+  <p class="eyebrow">Under the hood · technical guide</p>
+  <h1>Systems <span>guide</span></h1>
+  <div class="intro">
+<p>A tour of how the game works under the hood, written for a software engineer who is new to game development. Each section explains the game-dev idea first, maps it to concepts you already know, then points at the real code here.</p>
+<p>Design specs (what a feature does and why) live in <code>Docs/Design/</code>. This guide covers <b>how the code is built</b>. Paths below are relative to the repo root. Most runtime code is under <code>Assets/_Project/Scripts/</code> (written <code>Scripts/</code>).</p>
+  </div>
+  <div class="facts">
+    <span>Engine <b>Unity 6 · URP · C#</b></span>
+    <span>For <b>engineers new to game dev</b></span>
+    <span>File paths <b>refer to the private game source</b></span>
+  </div>
+</header>
+
+<div class="layout">
+  <aside class="toc">
+    <details id="toc-box" open>
+      <summary class="eyebrow">Contents</summary>
+      <ol>
+<li><a href="#the-unity-mental-model-in-one-page"><span class="num">0</span>The Unity mental model in one page</a></li>
+<li><a href="#project-architecture"><span class="num">1</span>Project architecture</a></li>
+<li><a href="#game-flow-and-lifecycle"><span class="num">2</span>Game flow and lifecycle</a></li>
+<li><a href="#the-player"><span class="num">3</span>The player</a></li>
+<li><a href="#combat-from-trigger-pull-to-damage"><span class="num">4</span>Combat: from trigger pull to damage</a></li>
+<li><a href="#enemies-and-ai"><span class="num">5</span>Enemies and AI</a></li>
+<li><a href="#rounds-and-spawning"><span class="num">6</span>Rounds and spawning</a></li>
+<li><a href="#economy-and-progression"><span class="num">7</span>Economy and progression</a></li>
+<li><a href="#quests-and-the-main-quest"><span class="num">8</span>Quests and the main quest</a></li>
+<li><a href="#game-feel-audio-vfx-camera"><span class="num">9</span>Game feel: audio, VFX, camera</a></li>
+<li><a href="#rendering"><span class="num">10</span>Rendering</a></li>
+<li><a href="#ui"><span class="num">11</span>UI</a></li>
+<li><a href="#settings-and-persistence"><span class="num">12</span>Settings and persistence</a></li>
+<li><a href="#performance-practices-why-the-code-looks-the-way-it-does"><span class="num">13</span>Performance practices (why the code looks the way it does)</a></li>
+<li><a href="#the-content-pipeline-the-map-is-generated-by-code"><span class="num">14</span>The content pipeline: the map is generated by code</a></li>
+<li><a href="#testing-tooling-and-debugging"><span class="num">15</span>Testing, tooling and debugging</a></li>
+<li><a href="#designed-for-co-op-later"><span class="num">16</span>Designed for co-op later</a></li>
+<li><a href="#a-suggested-learning-path"><span class="num">17</span>A suggested learning path</a></li>
+<li><a href="#glossary"><span class="num"></span>Glossary</a></li>
+      </ol>
+    </details>
+  </aside>
+  <main>
+<section class="g-sec" id="the-unity-mental-model-in-one-page">
+<h2><span class="num">0</span>The Unity mental model in one page</h2>
+<div class="tbl"><table><thead><tr><th>Unity concept</th><th>What it is, in software terms</th></tr></thead><tbody>
+<tr><td><b>Scene</b> (<code>.unity</code>)</td><td>A serialized object graph loaded at runtime. We have one real scene: <code>Assets/_Project/Scenes/Lanternfall_Greybox.unity</code>.</td></tr>
+<tr><td><b>GameObject</b></td><td>An entity: a named node in a transform tree, with no behaviour of its own.</td></tr>
+<tr><td><b>Component</b></td><td>Behaviour or data attached to a GameObject (composition over inheritance). <code>Transform</code>, <code>Collider</code>, <code>Renderer</code>, <code>AudioSource</code>, and our own scripts.</td></tr>
+<tr><td><b>MonoBehaviour</b></td><td>A C# class that is a component. Unity calls its lifecycle methods by reflection (<code>Awake</code>, <code>OnEnable</code>, <code>Start</code>, <code>Update</code>, <code>LateUpdate</code>, <code>OnDisable</code>, <code>OnDestroy</code>).</td></tr>
+<tr><td><b>Prefab</b> (<code>.prefab</code>)</td><td>A serialized GameObject template you instantiate many times, like a class you can <code>new</code> (e.g. <code>Prefabs/Enemies/Drowned.prefab</code>).</td></tr>
+<tr><td><b>ScriptableObject</b> (<code>.asset</code>)</td><td>A serialized data object that lives as a file, not in a scene. We use these as <b>config files</b>: every tunable number is in one (<code>Data/Config/*.asset</code>, <code>Data/Weapons/*.asset</code>).</td></tr>
+<tr><td><b><code>[SerializeField] private</code></b></td><td>A private field Unity saves into the scene/prefab/asset and shows in the Inspector. This is how dependencies are wired (an inject-by-editor DI).</td></tr>
+<tr><td><b><code>.meta</code> files</b></td><td>Each asset's stable GUID. References between assets are by GUID, so never delete or hand-edit a <code>.meta</code>.</td></tr>
+<tr><td><b>The frame loop</b></td><td>Single-threaded main loop. Every frame: input, then <code>Update</code> on every enabled component, animation, <code>LateUpdate</code>, then rendering. <code>FixedUpdate</code> runs at a fixed physics rate.</td></tr>
+<tr><td><b><code>Time.deltaTime</code></b></td><td>Seconds since the last frame. Anything that moves or counts down multiplies by it, so behaviour doesn't depend on frame rate. <code>Time.timeScale = 0</code> freezes scaled time, which is how a solo pause works.</td></tr>
+</tbody></table></div>
+<p>Two things surprise most engineers:</p>
+<ol>
+<li><b>Almost everything runs on the main thread, once per frame.</b> There is no request/response; there is "what changed this frame". Performance is a per-frame budget: about <b>16.6 ms at 60 fps</b> for all game code plus rendering.</li>
+<li><b>Garbage collection causes visible hitches.</b> A GC pause of a few milliseconds is a dropped frame. So hot paths (<code>Update</code>, per-shot, per-hit code) must not allocate. See section 13.</li>
+</ol>
+</section>
+<section class="g-sec" id="project-architecture">
+<h2><span class="num">1</span>Project architecture</h2>
+<h3 id="assemblies-compile-units">Assemblies (compile units)</h3>
+<div class="tbl"><table><thead><tr><th>Assembly</th><th>Folder</th><th>Contents</th></tr></thead><tbody>
+<tr><td><code>Game.Runtime</code></td><td><code>Scripts/</code> (minus Editor)</td><td>Everything that ships in the game. References Input System, AI Navigation (NavMesh), URP.</td></tr>
+<tr><td><code>Game.Editor</code></td><td><code>Scripts/Editor/</code></td><td>Editor-only tooling: the map builder, procedural art kit, playtest builder, asset setup. Never in a build.</td></tr>
+<tr><td><code>Game.Tests.EditMode</code></td><td><code>Assets/_Project/Tests/EditMode/</code></td><td>NUnit tests (~170 files, ~1,700 test cases), run inside the Editor.</td></tr>
+</tbody></table></div>
+<p><code>.asmdef</code> files define these. Splitting assemblies means a change only recompiles its own assembly and the ones that depend on it, and it stops runtime code from calling editor APIs (which would fail the build).</p>
+<h3 id="folders-by-feature-namespaces-by-feature">Folders by feature, namespaces by feature</h3>
+<p><code>Scripts/</code> has one folder per system: <code>Core</code>, <code>Player</code>, <code>Weapons</code>, <code>Enemies</code>, <code>Waves</code>, <code>Economy</code>, <code>Interaction</code>, <code>Perks</code>, <code>PowerUps</code>, <code>Chest</code>, <code>Anvil</code>, <code>Shards</code>, <code>Relics</code>, <code>Starbow</code>, <code>Shield</code>, <code>Grenades</code>, <code>Lantern</code>, <code>Lure</code>, <code>MainQuest</code>, <code>Keeper</code>, <code>Victory</code>, <code>World</code>, <code>Feel</code>, <code>UI</code>. Namespaces match (<code>Game.Weapons</code>, <code>Game.Enemies</code>, ...).</p>
+<h3 id="the-core-pattern-thin-monobehaviours-plain-c-rules">The core pattern: thin MonoBehaviours, plain C# rules</h3>
+<p>This is the most important convention in the codebase:</p>
+<ul>
+<li><b>Rules</b> (damage math, wave scaling, fire timing, pause logic, spawn choice) live in <b>plain C# classes</b>, often <code>static</code>, with no Unity lifecycle. They take inputs (including the current time) as parameters and return results.</li>
+<li><b>MonoBehaviours</b> are thin adapters. They read input and the scene, call the rules, and apply the results to Unity objects.</li>
+</ul>
+<p>Why: plain classes are deterministic and testable in milliseconds without starting the game. A few examples:</p>
+<div class="tbl"><table><thead><tr><th>Rule class</th><th>What it decides</th><th>Used by</th></tr></thead><tbody>
+<tr><td><code>Scripts/Waves/RoundMath.cs</code></td><td>enemy count, health, spawn interval per round</td><td><code>RoundManager</code></td></tr>
+<tr><td><code>Scripts/Weapons/FireTimer.cs</code></td><td>how many shots fire this frame, frame-rate independent</td><td><code>HitscanWeapon</code></td></tr>
+<tr><td><code>Scripts/Core/Hitbox.cs</code> (<code>HitZone</code>)</td><td>headshot / weak-point multipliers</td><td><code>HitscanWeapon</code>, <code>Damageable</code></td></tr>
+<tr><td><code>Scripts/Economy/PointRules.cs</code></td><td>points for a hit or kill</td><td><code>PlayerCore</code></td></tr>
+<tr><td><code>Scripts/Core/PauseService.cs</code></td><td>whether the game is paused, by owner set</td><td><code>GameManager</code></td></tr>
+</tbody></table></div>
+<p><code>PauseService</code> is a good example of <b>ports and adapters</b>: it writes its result through an <code>IPauseSink</code> interface. At runtime the sink sets <code>Time.timeScale</code> and the input gate; in tests it's a fake that records calls.</p>
+<h3 id="cross-system-communication-c-events">Cross-system communication: C# events</h3>
+<p>Systems talk through <code>event Action&lt;...&gt;</code> rather than calling each other directly. For example, <code>RoundManager</code> raises <code>RoundStarted</code>, <code>RoundEnded</code>, <code>EnemyKilled</code> and <code>GameOver</code>, and <code>Zombie</code> raises <code>Killed</code>, <code>Damaged</code>, <code>Despawned</code> and <code>AttackStarted</code>. Audio, VFX, UI, quests and relics subscribe, and the producer doesn't know they exist. This is an in-process observer/pub-sub. The rule is to unsubscribe in <code>OnDisable</code>/<code>OnDestroy</code>, or you leak references and get callbacks on destroyed objects.</p>
+<h3 id="one-manager-no-other-singletons">One manager, no other singletons</h3>
+<p><code>Scripts/Core/GameManager.cs</code> is the only singleton (<code>GameManager.Instance</code>). Other systems are found through serialized references or passed in. Static state is avoided, and where it exists (debug toggles, caches) it is reset in a <code>[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]</code> method. That matters because the Editor can enter Play mode <b>without reloading the C# domain</b>, so statics would otherwise survive from the last session.</p>
+<h3 id="partial-classes-split-big-components">Partial classes split big components</h3>
+<p><code>RoundManager</code> is split into <code>RoundManager.cs</code>, <code>.Hounds.cs</code>, <code>.Bellringer.cs</code>, <code>.FightAdds.cs</code>, <code>.QuestSurge.cs</code>, <code>.QuestHold.cs</code> and <code>.Relics.cs</code>. <code>Zombie</code> has <code>.Hound.cs</code>, <code>.Bellringer.cs</code>, <code>.Lure.cs</code>, <code>.Blast.cs</code> and <code>.Debug.cs</code>. The same component, but one file per concern, so feature work touches small files.</p>
+</section>
+<section class="g-sec" id="game-flow-and-lifecycle">
+<h2><span class="num">2</span>Game flow and lifecycle</h2>
+<h3 id="startup-order">Startup order</h3>
+<p>Unity calls <code>Awake</code> on every object, then <code>Start</code>, in an order you don't control unless you set <code>[DefaultExecutionOrder(n)]</code> (lower runs first). We pin the few that matter:</p>
+<div class="tbl"><table><thead><tr><th>Order</th><th>Component</th><th>Why first</th></tr></thead><tbody>
+<tr><td>-1000</td><td><code>World/RuntimeNavMeshBaker</code></td><td>Bakes the navigation mesh in <code>Start</code> (not <code>Awake</code>, because modifiers only register in their <code>OnEnable</code>). Nothing may path before it.</td></tr>
+<tr><td>-500</td><td><code>World/LighthousePower</code></td><td>Resets the power state so machines start unpowered.</td></tr>
+<tr><td>-300</td><td><code>Core/GameManager</code></td><td>Reads Esc before UI panels, so one key press doesn't both close a card and open the pause menu.</td></tr>
+</tbody></table></div>
+<h3 id="the-game-state-machine">The game state machine</h3>
+<p><code>Core/GameFlow.cs</code> is a small pure state machine: <code>MainMenu</code>, <code>Playing</code>, <code>Paused</code>, <code>GameOver</code>, with <code>CanTransition(from, to)</code> and a <code>Changed</code> event. <code>GameManager</code> owns it, plus the cursor and pause service. The main menu is drawn <b>over the live town</b>: the round loop idles, the player camera is off, and <code>UI/MenuCamera</code> orbits.</p>
+<h3 id="restarting-reloading-the-scene">Restarting = reloading the scene</h3>
+<p>Restart, Retry and Quit to menu reload the whole scene (<code>RoundManager.Restart()</code>), which is the simplest way to guarantee a clean slate. Because a reload destroys every object, the one value that must survive, "land in the menu or straight in a run?", sits in a tiny static: <code>Core/SessionLaunch.cs</code> (<code>Request</code> before reload, <code>Consume</code> in <code>GameManager.Awake</code>).</p>
+<h3 id="pausing">Pausing</h3>
+<p>Any system that needs a pause (pause menu, level-up cards, path cards, game over) calls <code>GameManager.Pause.RequestPause(owner)</code> and later <code>ReleasePause(owner)</code>. The game is paused while <b>any</b> owner holds it, so overlapping modals can't un-pause each other (a reference-counted lock). The policy is <code>FreezeWorld</code> in solo (timeScale 0 + input gate). For co-op it can become <code>Overlay</code> (only that player's input is gated) without changing any caller. <code>Player/InputGate.cs</code> is the matching input lock, with a short "fire block" after unpausing so the click that closed a menu doesn't also fire the gun.</p>
+</section>
+<section class="g-sec" id="the-player">
+<h2><span class="num">3</span>The player</h2>
+<p><code>Player/PlayerCore.cs</code> is the hub. Other systems talk to "the player" through it: <code>Wallet</code> (points), <code>Stats</code>, <code>Health</code>, <code>Weapons</code>, <code>Controller</code>, <code>Perks</code>, <code>Relics</code>, and points multipliers. Per-player state lives on the player, never in statics, because co-op is planned.</p>
+<ul>
+<li><b>Movement:</b> <code>Player/FirstPersonController.cs</code> uses Unity's <code>CharacterController</code> (a capsule with collide-and-slide movement, no rigid-body physics) and the <b>new Input System</b> (<code>Assets/InputSystem_Actions.inputactions</code>: named actions like Fire, Aim and Interact, bound to keyboard and gamepad). It includes a wall guard, so a crowd pushing the capsule can't squeeze it through thin walls.</li>
+<li><b>Health:</b> <code>Player/PlayerHealth.cs</code> handles damage, regen, the downed state and Second Wind. Enemy melee arrives as <code>TakeDamage(amount, attackerPos)</code> so the HUD can show which direction a hit came from.</li>
+<li><b>Interaction:</b> <code>Interaction/PlayerInteractor.cs</code> + <code>Interactable.cs</code>. Doors, wall buys, machines and quest objects are interactables with a prompt and a hold time.</li>
+</ul>
+</section>
+<section class="g-sec" id="combat-from-trigger-pull-to-damage">
+<h2><span class="num">4</span>Combat: from trigger pull to damage</h2>
+<p>This is the most important pipeline to understand. In order:</p>
+<ol>
+<li><b>Trigger.</b> <code>Weapons/PlayerWeapons.cs</code> routes input to the held weapon. <code>Weapons/HitscanWeapon.cs</code> asks <code>FireTimer</code> how many shots to fire this frame. An 850 RPM gun at 60 fps fires 14.2 shots per second, so the timer carries the fractional remainder between frames instead of rounding to whole frames.</li>
+<li><b>Hitscan.</b> Every gun is <b>hitscan</b>: the bullet is an instant ray, <code>Physics.Raycast</code> from the camera along the aim plus spread, not a flying object. Piercing guns use <code>Physics.RaycastNonAlloc</code> into a preallocated <code>RaycastHit[]</code> buffer (no garbage). The visible tracer is just a visual effect.</li>
+<li><b>Hit zones.</b> The ray hits a collider. If it carries a <code>Core/Hitbox.cs</code> (head or weak point), the multiplier comes from <code>HitZone.Multiplier</code>. Enemy colliders are invisible boxes separate from the visible mesh, so the art can change without changing gameplay.</li>
+<li><b>Damage.</b> The weapon builds a <code>DamageInfo</code> (a <code>readonly struct</code>, passed <code>in</code> so it isn't copied: amount, point, direction, headshot, source, <code>DamageKind</code>, crit, element, ...). It calls <code>IDamageable.TakeDamage(in info)</code> on the target's <code>Core/Damageable.cs</code>.</li>
+<li><b>Shaping.</b> <code>Damageable</code> runs the optional per-target hooks:<ul><li><code>IDamageShaper</code>: armour, such as the Bellringer's front shell at x0.2;</li><li><code>IDamageBonus</code>: e.g. a relic's mark.</li></ul><p>Then it applies the result to <code>Health</code>, flashes the renderers and returns a <code>DamageResult</code> (applied, killed).</p></li>
+<li><b>Consequences fan out through events.</b> The <code>Zombie.Damaged</code> and <code>Killed</code> events drive:<ul><li>points, via <code>PointRules</code> and the player's wallet;</li><li>shards and power-up drops;</li><li>feel: damage numbers, hit stop, sounds, VFX;</li><li>relic procs and quest progress.</li></ul><p>The weapon also fills a <code>ShotReport</code> (all hits of one shot) for the hit marker and recoil feel.</p></li>
+</ol>
+<p><code>DamageKind</code> (<code>Bullet</code>, <code>Melee</code>, <code>Explosive</code>, <code>PowerUp</code>, <code>Element</code>, <code>Relic</code>) is how downstream code tells hits apart: element ticks pay no hit points, power-up kills drop nothing, relic hits never proc elements, and so on. Enforcing those rules in one enum keeps them out of a dozen <code>if</code> chains.</p>
+<p>Other weapon types plug into the same pipeline: the Starbow (<code>Scripts/Starbow/</code>, hold-to-draw hitscan), grenades and the lure (<code>Scripts/Grenades/</code>, <code>Scripts/Lure/</code>, kinematic sweeps + <code>BlastRules</code> falloff), and the Lantern (<code>Scripts/Lantern/</code>, pooled bolts that chain).</p>
+</section>
+<section class="g-sec" id="enemies-and-ai">
+<h2><span class="num">5</span>Enemies and AI</h2>
+<h3 id="the-drowned-a-state-machine-on-a-navmeshagent">The Drowned: a state machine on a NavMeshAgent</h3>
+<p><code>Enemies/Zombie.cs</code> is the enemy brain, a classic <b>finite state machine</b>:</p>
+<pre class="code" aria-label="State machine diagram"><code>Inactive -&gt; Approaching -&gt; Breaching -&gt; Climbing -&gt; Chasing &lt;-&gt; Attacking -&gt; Dying -&gt; (back to the pool)
+                                        (Emerging, Lunging: hound / Tidecrawler variants)</code></pre>
+<p><code>Update</code> switches on <code>State</code> and calls <code>UpdateApproach</code>, <code>UpdateBreach</code> and so on. Each state is a few lines of "check conditions, maybe transition".</p>
+<h3 id="pathfinding-navmesh">Pathfinding: NavMesh</h3>
+<p>Unity's <b>NavMesh</b> is a precomputed polygon mesh of walkable floor. A <code>NavMeshAgent</code> component does A* on it plus local steering and avoidance; you set a destination and it walks there. Our town is generated, so the NavMesh is baked at load by <code>World/RuntimeNavMeshBaker.cs</code>. Props that must not block it get a <code>NavMeshModifier</code> set to ignore them. Solid props get a "Not Walkable" volume.</p>
+<h3 id="animation-without-an-animator">Animation without an Animator</h3>
+<p>Most games use Unity's Animator with authored clips. Ours is <b>procedural</b>: <code>Enemies/DrownedAnimator.cs</code> and <code>Enemies/CreatureMotion.cs</code> compute limb rotations every frame from walk speed, a seeded per-enemy personality, damped springs (head lag, arm lag) and fixed timing envelopes (wind-ups, hit reactions, deaths). It's math-driven, testable, and costs nothing to author. Tests pin the attack timings so animation changes can't change gameplay.</p>
+<h3 id="variants-pooling-and-look">Variants, pooling and look</h3>
+<ul>
+<li>One prefab carries every Drowned variant's rig. <code>EnemyVariant</code> ScriptableObjects (<code>Data/Enemies/Variant_*.asset</code>) pick the rig and tune speed, health and weak points.</li>
+<li><b>Object pooling:</b> enemies are never <code>Instantiate</code>d or <code>Destroy</code>ed during play. <code>RoundManager</code> keeps a pool; <code>GetFromPool</code> reuses an inactive <code>Zombie</code>, <code>Spawn(...)</code> resets it, and dying ends with <code>SetActive(false)</code> and a <code>Despawned</code> event. Creating and destroying objects is slow and makes garbage; pools turn it into a reset.</li>
+<li><b>Visual LOD:</b> <code>Enemies/CreatureLook.cs</code> swaps mesh detail by distance and graphics preset (plain rules in <code>CreatureDetail.cs</code>). <code>CreatureRim.cs</code> adds a silhouette rim light through a per-renderer shader value.</li>
+</ul>
+<h3 id="bosses-and-specials">Bosses and specials</h3>
+<ul>
+<li><b>The Keeper</b> (<code>Scripts/Keeper/</code>) follows the same split: plain classes <code>KeeperBrain</code>, <code>KeeperAttackScheduler</code>, <code>CarapaceRules</code> and <code>KeeperGeometry</code> decide everything. <code>KeeperBoss</code> and <code>KeeperRig</code> apply it to the scene.</li>
+<li><b>Hounds and the Bellringer</b> are <code>Zombie</code> partials with their own schedules in <code>Scripts/Waves/</code>.</li>
+</ul>
+</section>
+<section class="g-sec" id="rounds-and-spawning">
+<h2><span class="num">6</span>Rounds and spawning</h2>
+<p><code>Waves/RoundManager.cs</code> runs the core loop: <code>BeginRun</code> → <code>StartRound(n)</code> → spawn the round's enemies over time → all dead → intermission → next round. Inputs:</p>
+<ul>
+<li><code>RoundConfig</code> (ScriptableObject) holds the curve parameters. <code>RoundMath</code> turns them into enemy count (a quadratic in the round number, capped), health (linear, then exponential), and spawn interval (shrinking to a floor).</li>
+<li><code>Waves/SpawnRules.cs</code> picks a spawn window: the nearest usable windows to the player, a minimum distance, a preference for the player's own area, and a vertical weight for the tunnels.</li>
+<li><code>Waves/VariantMix.cs</code> decides which Drowned variant each spawn is, by round.</li>
+</ul>
+<p>Special rounds and events are partials and schedules: hound rounds every 5th round (<code>HoundSchedule</code>), the Bellringer (<code>BellringerSchedule</code>), quest surges, boss-fight adds that never touch round counts, and relic offers every 3rd round.</p>
+</section>
+<section class="g-sec" id="economy-and-progression">
+<h2><span class="num">7</span>Economy and progression</h2>
+<ul>
+<li><b>Points:</b> <code>Economy/PointsWallet.cs</code> (per player) + <code>PointRules.cs</code> + <code>EconomyConfig</code>. Doors, wall buys, perks, the chest and the Anvil spend from it.</li>
+<li><b>Perks</b> (<code>Scripts/Perks/</code>): machines grant passive buffs, up to 4, lost on going down.</li>
+<li><b>Weapons upgrade</b> (<code>Scripts/Anvil/</code>): forging adds a runtime <code>WeaponUpgrade</code> to a <code>HitscanWeapon</code>, while the base <code>WeaponData</code> asset stays the gun's identity. Elements (Burn, Chill, Chain, Ricochet) run in <code>ElementStatusSystem</code>.</li>
+<li><b>Run upgrades</b> (<code>Scripts/Shards/</code>): XP shards → level-up → pick 1 of 3 cards → <code>WeaponModifiers.SetRun</code>.</li>
+<li><b>Relics</b> (<code>Scripts/Relics/</code>): passive weapons with levels and twists, attached at runtime by <code>RelicSystems.Attach</code>.</li>
+<li><b>Random rewards</b> (<code>Scripts/Chest/</code>): <code>ChestRules.RollPrize</code> pre-rolls special prizes, then the gun. Every random draw goes through an injected <code>rng01</code> function, so tests can make the outcomes deterministic.</li>
+</ul>
+</section>
+<section class="g-sec" id="quests-and-the-main-quest">
+<h2><span class="num">8</span>Quests and the main quest</h2>
+<p>The Starbow paths use a small <b>data-driven step machine</b>: <code>Starbow/Quest/QuestStepMachine.cs</code> + <code>QuestStepDef</code> (types such as ShootTargets, KillNear, Carry, Retrieve and HoldZone, each <code>Locked</code> → <code>Active</code> → <code>Done</code>). A quest is data, so a new quest is mostly a list of step definitions plus markers in the scene. The main quest (<code>Scripts/MainQuest/</code>) reuses step ideas with its own director: the lens, logs, Midnight bell and boss gate.</p>
+</section>
+<section class="g-sec" id="game-feel-audio-vfx-camera">
+<h2><span class="num">9</span>Game feel: audio, VFX, camera</h2>
+<p>"Feel" is the layer that makes actions satisfying. It all lives in <code>Scripts/Feel/</code> and reacts to events.</p>
+<ul>
+<li><b>Audio:</b> only <code>Feel/SfxPlayer.cs</code> (and the ambience/music directors) may play sounds; a test greps for violations. <code>SfxPlayer</code> owns fixed pools of <code>AudioSource</code>s (<code>VoicePool</code>), with <b>priority stealing</b> when all voices are busy and distance low-pass filtering. <code>AudioBusRules</code> implements buses and <b>ducking</b> (e.g. telegraph sounds lower everything else) in code, with no AudioMixer.</li>
+<li><b>Music:</b> <code>MusicDirector</code> schedules stems with <code>AudioSource.PlayScheduled</code>, which is sample-accurate, so loops and layer swaps land exactly on the bar.</li>
+<li><b>VFX:</b> one pooled <code>Feel/Vfx.cs</code> service drives 3 particle systems and a ribbon mesh for every effect in the game. Effects are "emit N particles here", not GameObjects. <code>VfxBudget</code> thins effects by preset and crowd size.</li>
+<li><b>Camera and timing:</b><ul><li><code>TraumaShake</code> / <code>CameraShaker</code>: shake that the aim ignores.</li><li><code>HitStop</code>: a few-millisecond freeze on big hits.</li><li><code>Spring</code>: damped springs for view kick.</li><li><code>Player/ViewSway</code>: weapon bob and sway.</li></ul></li>
+</ul>
+</section>
+<section class="g-sec" id="rendering">
+<h2><span class="num">10</span>Rendering</h2>
+<ul>
+<li><b>URP</b> (Universal Render Pipeline) is Unity's configurable forward renderer. Its settings are assets in <code>Assets/Settings/</code> (<code>PC_RPAsset</code>, the renderers <code>PC_Renderer</code> and <code>PC_Renderer_LiteAO</code>).</li>
+<li><b>Custom shaders</b> (<code>Art/Shaders/</code>, HLSL in ShaderLab): <code>LanternfallFlat</code> (environment), <code>LanternfallFlatCreature</code> (enemies, guns), <code>LanternfallFxAdditive</code> (VFX), <code>LanternfallInkOutline</code> (gun outlines) and <code>LanternfallSky</code>.</li>
+<li><b>Flat-shaded low poly via vertex colours:</b> most of the world uses one material, <code>M_Kit_Flat</code>. Colour lives in the mesh's vertex colours and glow in vertex alpha, so thousands of pieces share one material. That keeps GPU <b>state changes</b> ("SetPass calls") low, and those, more than triangles, are what cost on integrated GPUs.</li>
+<li><b>Draw calls and batching:</b> every visible mesh x material is a draw call. Batching combines them:<ul><li>The kit combines decoration per area and 16 m cell into a few meshes.</li><li>Shaders stay <b>SRP-batcher compatible</b>: per-material data sits in one constant buffer, and per-object variation goes through <code>MaterialPropertyBlock</code> or <code>Renderer.SetShaderUserValue</code>.</li></ul></li>
+<li><b>One writer for global state:</b> <code>World/SkyDirector.cs</code> is the only runtime code that writes <code>RenderSettings</code> (fog, ambient), the sky and the post-processing volume. It blends looks from state weights (round, low tide, Midnight, arena, dawn) through plain <code>SkyBlend</code> and <code>PostBlend</code> classes. One owner for shared mutable state avoids fights between systems.</li>
+<li><b>Graphics presets:</b> <code>Data/UI/GraphicsPresetConfig</code> plus <code>UI/SettingsApplier</code> set shadows, culling, detail tiers and the renderer per preset.<ul><li>Detail tiers are hidden on Low with <code>Renderer.forceRenderingOff</code> (<code>World/KitTiers.cs</code>).</li><li>Clutter is culled per layer with <code>Camera.layerCullDistances</code>.</li></ul></li>
+</ul>
+</section>
+<section class="g-sec" id="ui">
+<h2><span class="num">11</span>UI</h2>
+<p>Unity's <b>UI Toolkit</b> is like a retained-mode DOM: layout files <code>Art/UI/*.uxml</code>, stylesheets <code>*.uss</code>, and C# that binds to elements. Patterns used:</p>
+<ul>
+<li><b>Model/view split:</b> <code>UI/Hud/HudModel</code> is pure (what to show) and <code>HudView</code> binds it to elements, so the HUD logic is testable.</li>
+<li><code>UI/Hud/NotificationQueue.cs</code> (<code>ToastQueue</code>, <code>BannerQueue</code>) handles toasts and banners with priority and merging.</li>
+<li>UI never pauses the game directly; it goes through <code>PauseService</code>.</li>
+</ul>
+</section>
+<section class="g-sec" id="settings-and-persistence">
+<h2><span class="num">12</span>Settings and persistence</h2>
+<ul>
+<li><code>Core/Settings/GameSettings.cs</code> is a plain class serialized to JSON, stored through an <code>ISettingsStore</code>: PlayerPrefs at runtime, in-memory in tests. <code>UI/SettingsApplier.cs</code> applies changes live.</li>
+<li>Victory records (<code>Victory/VictoryRecordStore</code>) use <b>versioned JSON</b>, so old saves can be migrated.</li>
+<li>There is no save-game mid-run (by design: a run is a session).</li>
+</ul>
+</section>
+<section class="g-sec" id="performance-practices-why-the-code-looks-the-way-it-does">
+<h2><span class="num">13</span>Performance practices (why the code looks the way it does)</h2>
+<div class="tbl"><table><thead><tr><th>Rule</th><th>Why</th><th>Example</th></tr></thead><tbody>
+<tr><td>No allocation in <code>Update</code> or per hit</td><td>GC pauses drop frames</td><td>preallocated <code>RaycastHit[]</code>, <code>readonly struct DamageInfo</code> passed <code>in</code></td></tr>
+<tr><td>Pool everything that spawns</td><td><code>Instantiate</code>/<code>Destroy</code> are slow and make garbage</td><td>enemies, arrows, flasks, bolts, VFX particles, audio voices</td></tr>
+<tr><td>Cache component lookups</td><td><code>GetComponent</code> is a search</td><td>fields filled in <code>Awake</code></td></tr>
+<tr><td>Cache shader property IDs</td><td>string lookups are slow</td><td><code>Shader.PropertyToID("_BaseColor")</code> as <code>static readonly int</code></td></tr>
+<tr><td>Write only on change</td><td>redundant GPU/state writes cost</td><td><code>KitTiers</code>, <code>CreatureRim</code>, <code>SkyDirector</code> compare before writing</td></tr>
+<tr><td>Measure, don't guess</td><td>intuition is often wrong</td><td><code>Editor/Kit/ArtSweep</code> (draws/SetPass/tris per view and preset), Settings &gt; Video &gt; Show FPS (<code>UI/Perf/PerfOverlay</code>, <code>FrameTimingManager</code>)</td></tr>
+</tbody></table></div>
+<p>A real example: the Medium preset was over its draw-call budget. Measuring showed the cause wasn't the art but the SSAO effect's depth-normals prepass, which drew every object twice. Switching to a renderer whose AO reads the existing depth buffer roughly halved draw calls on every preset (<code>Core/Settings/PresetRendering.cs</code>, <code>Docs/Design/ArtPass2.md</code> section 13).</p>
+</section>
+<section class="g-sec" id="the-content-pipeline-the-map-is-generated-by-code">
+<h2><span class="num">14</span>The content pipeline: the map is generated by code</h2>
+<p>The scene isn't hand-built in the editor. <code>Scripts/Editor/GreyboxMapBuilder.cs</code> (+ ~35 partial files, about 8,500 lines) runs from <b>Game &gt; Build Greybox Map</b> and creates the whole town in code:</p>
+<ul>
+<li>walls, doors, windows, markers, machines and quest objects;</li>
+<li>wiring the serialized references between them;</li>
+<li>saving the scene and prefabs.</li>
+</ul>
+<p>Then the <b>art kit</b> (<code>Scripts/Editor/Kit/</code>) runs last. It is a set of seeded procedural mesh generators (facades, roofs, props, creatures, weapons). It restyles and decorates the greybox, combines meshes, and <b>validates</b> the result:</p>
+<ul>
+<li>every decoration piece is checked against keep-out zones around gameplay objects;</li>
+<li>colliders are diffed before and after;</li>
+<li>the NavMesh is compared before and after;</li>
+<li>every gameplay marker must have a keep-out.</li>
+</ul>
+<p>Why build a level this way:</p>
+<ul>
+<li>It's reviewable and diffable code instead of opaque scene edits.</li>
+<li>It's reproducible: same seed, same town.</li>
+<li>Art can't silently break gameplay, because the validator fails the build.</li>
+</ul>
+<p>Audio is generated too: <code>Tools/sfx_gen.py</code> and <code>Tools/music_gen.py</code> synthesise every sound and the music stems. They are checked against manifests, and size budgets apply.</p>
+</section>
+<section class="g-sec" id="testing-tooling-and-debugging">
+<h2><span class="num">15</span>Testing, tooling and debugging</h2>
+<ul>
+<li><b>EditMode tests</b> (<code>Assets/_Project/Tests/EditMode/</code>) use NUnit through the Unity Test Framework, run inside the Editor. They mostly test the plain rule classes, plus asset and prefab checks (e.g. "no Danger Red on enemy colours", "hit-zone colliders unchanged", "the enemy shader has 4 passes").</li>
+<li><b>Unity CLI</b> (<code>~/.unity/bin/unity</code>): recompile, run tests, invoke editor menus, evaluate C# in the running game, and capture screenshots from the terminal. This is how the AI agents drive the Editor (see CLAUDE.md).</li>
+<li><b>Stop hook</b> (<code>.claude/hooks/unity-check.sh</code>): after any C# change, recompiles and runs the tests before the agent may finish.</li>
+<li><b>Debug commands:</b> every system has a <code>*Debug</code> static class compiled only in editor and dev builds (<code>#if UNITY_EDITOR || DEBUG</code>), e.g. <code>Game.Endgame.KeeperDebug.SetPhase(2)</code>, callable through script eval. There is also an F1 dev panel in dev builds.</li>
+<li><b>Builds:</b> <code>Scripts/Editor/PlaytestBuilder.cs</code> makes the Windows x64 playtest zip with HOW_TO_PLAY.txt.</li>
+</ul>
+</section>
+<section class="g-sec" id="designed-for-co-op-later">
+<h2><span class="num">16</span>Designed for co-op later</h2>
+<p>The game is solo, but the code avoids decisions that would block co-op:</p>
+<ul>
+<li>per-player state on the player, not in statics;</li>
+<li>enemies pick a target rather than "the player";</li>
+<li>pause through a policy that can become an overlay;</li>
+<li>rules are deterministic and seeded, which matters if a server or host must agree with clients;</li>
+<li>players are looked up through one place, not <code>FindAnyObjectByType</code> scattered around.</li>
+</ul>
+</section>
+<section class="g-sec" id="a-suggested-learning-path">
+<h2><span class="num">17</span>A suggested learning path</h2>
+<ol>
+<li><b>Read the damage pipeline end to end:</b> <code>HitscanWeapon.Fire</code> → <code>Damageable.TakeDamage</code> → <code>Zombie</code> events → <code>PointRules</code>. Then read its tests (search <code>Tests/EditMode</code> for <code>HitZone</code>, <code>PointRules</code>, <code>FireTimer</code>).</li>
+<li><b>Read <code>Zombie.cs</code>'s state machine</b> with a Drowned spawned in Play mode. Use <code>Game.Enemies.DrownedDebug.Spawn("Netter")</code> and watch the <code>State</code> field in the Inspector.</li>
+<li><b>Change a number, not code:</b> open <code>Data/Config/RoundConfig</code> (or a <code>WeaponData</code> asset) in the Inspector, change a value, and play. This is the designer's loop that ScriptableObjects enable.</li>
+<li><b>Use the Profiler</b> (Window &gt; Analysis &gt; Profiler) during a crowd fight. Find <code>Zombie.Update</code> and <code>SfxPlayer</code>, and check the GC Alloc column stays at 0.</li>
+<li><b>Use the Frame Debugger</b> (Window &gt; Analysis &gt; Frame Debugger) to watch one frame draw call by call. It is the best way to understand batching and SetPass.</li>
+<li><b>Small exercises:</b><ul><li>Add a new <code>DamageKind</code> behaviour with a test.</li><li>Add a new run-upgrade card.</li><li>Write a new quest step type for <code>QuestStepMachine</code>.</li></ul></li>
+</ol>
+</section>
+<section class="g-sec" id="glossary">
+<h2>Glossary</h2>
+<div class="tbl"><table><thead><tr><th>Term</th><th>Meaning</th></tr></thead><tbody>
+<tr><td>Hitscan</td><td>A shot resolved instantly by a raycast, with no projectile object.</td></tr>
+<tr><td>NavMesh / NavMeshAgent</td><td>Precomputed walkable surface / the component that paths and steers on it.</td></tr>
+<tr><td>Draw call</td><td>One "draw this mesh with this material" command to the GPU.</td></tr>
+<tr><td>SetPass call</td><td>A GPU state change (new shader or material setup). Often the real bottleneck on weak GPUs.</td></tr>
+<tr><td>SRP Batcher</td><td>URP's fast path that keeps per-material data on the GPU, so many objects draw cheaply.</td></tr>
+<tr><td>MaterialPropertyBlock</td><td>Per-renderer shader overrides without creating new materials.</td></tr>
+<tr><td>LOD</td><td>Level of detail: cheaper visuals at distance.</td></tr>
+<tr><td>Object pool</td><td>Reuse inactive objects instead of creating and destroying them.</td></tr>
+<tr><td>Hit stop</td><td>A tiny freeze on impact that makes hits feel heavy.</td></tr>
+<tr><td>Telegraph</td><td>A readable warning before an enemy attack.</td></tr>
+<tr><td>Domain reload</td><td>Unity recompiling and reloading the C# runtime; when skipped on Play, static fields survive.</td></tr>
+<tr><td>ScriptableObject</td><td>A data asset class; used here for all tuning and config.</td></tr>
+</tbody></table></div>
+</section>
+    <footer class="foot">
+      <p>Written alongside development from the game's code, as a companion to the devlog.</p>
+      <p>Lanternfall is an original game. Its setting, names, characters and map are its own.</p>
+      <p><a href="../index.html">← Back to the devlog</a></p>
+    </footer>
+  </main>
+</div>
+
+</div>
+<script>
+(function () {
+  var box = document.getElementById("toc-box");
+  var narrow = window.matchMedia("(max-width: 880px)");
+  function fit() { if (narrow.matches) box.removeAttribute("open"); else box.setAttribute("open", ""); }
+  fit();
+  if (narrow.addEventListener) narrow.addEventListener("change", fit);
+  box.querySelector("summary").addEventListener("click", function (e) { if (!narrow.matches) e.preventDefault(); });
+  var links = Array.prototype.slice.call(document.querySelectorAll(".toc a"));
+  links.forEach(function (a) { a.addEventListener("click", function () { if (narrow.matches) box.removeAttribute("open"); }); });
+  var byId = {};
+  links.forEach(function (a) { byId[a.getAttribute("href").slice(1)] = a; });
+  if (!("IntersectionObserver" in window)) return;
+  var current = null;
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) {
+      if (en.isIntersecting) {
+        if (current) current.classList.remove("on");
+        current = byId[en.target.id];
+        if (current) current.classList.add("on");
+      }
+    });
+  }, { rootMargin: "0px 0px -70% 0px" });
+  document.querySelectorAll(".g-sec").forEach(function (s) { io.observe(s); });
+})();
+</script>
+</body>
+</html>
